@@ -1,0 +1,121 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace M_SAVA_DAL.Models
+{
+    public enum FileExtensionType
+    {
+        Unknown = 0,
+
+        // Documents
+        _TXT = 1,
+        _PDF = 2,
+        _JSON = 3,
+        _DOCX = 4,
+        _CSV = 5,
+        _XLSX = 6,
+        _PPTX = 7,
+        _RTF = 8,
+        _HTML = 9,
+        _XML = 10,
+        _MD = 11,
+        _ODT = 12,
+        _ODS = 13,
+        _ODP = 14,
+        _DOC = 15,
+        _XLS = 16,
+        _PPT = 17,
+        _LOG = 18,
+        _YAML = 19,
+        _INI = 20,
+
+        // Raster images
+        _WEBP = 10001,
+        _PNG = 10002,
+        _JPEG = 10003,
+        _JPG = 10004,
+        _TIFF = 10005,
+        _BMP = 10006,
+        _GIF = 10007,
+        _ICO = 10008,
+        _HEIC = 10009,
+        _HEIF = 10010,
+        _PSD = 10011,
+        _EXR = 10012,
+        _TGA = 10013,
+        _JP2 = 10014,
+        _PBM = 10015,
+        _PGM = 10016,
+        _PPM = 10017,
+        _XBM = 10018,
+        _XPM = 10019,
+        _DIB = 10020,
+
+        // Vector images
+        _SVG = 20001,
+        _EPS = 20002,
+        _AI = 20003,
+        _WMF = 20004,
+        _EMF = 20005,
+        _CDR = 20006,
+        _CGM = 20007,
+        _DXF = 20008,
+        _DWG = 20009,
+        _SKETCH = 20010,
+        _FIG = 20011,
+        _DRW = 20012,
+        _VSD = 20013,
+        _FLA = 20014,
+        _SWF = 20015,
+        _SAI = 20016,
+        _SVGZ = 20017,
+        _HPGL = 20018,
+        _PLT = 20019,
+
+        // Audio
+        _WAV = 30001,
+        _FLAC = 30002,
+        _MP3 = 30003,
+        _AAC = 30004,
+        _OGG = 30005,
+        _M4A = 30006,
+        _WMA = 30007,
+        _AIFF = 30008,
+        _OPUS = 30009,
+        _AMR = 30010,
+        _APE = 30011,
+        _MPC = 30012,
+        _WV = 30013,
+        _TTA = 30014,
+        _DSF = 30015, 
+        _RA = 30016,
+        _GSM = 30017,
+        _AU = 30018,
+        _VOX = 30019,
+
+        // Video
+        _WEBM = 40001,
+        _AVI = 40002,
+        _MP4 = 40003,
+        _OGV = 40004,
+        _MKV = 40005,
+        _MOV = 40006,
+        _WMV = 40007,
+        _FLV = 40008,
+        _M4V = 40009,
+        _MPG = 40010,
+        _MPEG = 40011,
+        _3GP = 40012,
+        _3G2 = 40013,
+        _ASF = 40014,
+        _RM = 40015,
+        _VOB = 40016,
+        _TS = 40017,
+        _MTS = 40018,
+        _M2TS = 40019,
+        _F4V = 40020
+    }
+}

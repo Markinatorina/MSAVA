@@ -73,6 +73,7 @@ namespace M_SAVA_INF.Managers
 
         public FileStream GetFileStream(string fileNameWithExtension)
         {
+            ValidateFileName(fileNameWithExtension);
             string fullPath = FileContentUtils.GetFullPath(fileNameWithExtension);
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"File not found: {fullPath}");
@@ -154,6 +155,16 @@ namespace M_SAVA_INF.Managers
                 throw new UnauthorizedAccessException("User does not have access to this file's access group.");
             }
             return true;
+        }
+        private static void ValidateFileName(string fileNameWithExtension)
+        {
+            if (string.IsNullOrWhiteSpace(fileNameWithExtension) ||
+                fileNameWithExtension.Contains("..") ||
+                fileNameWithExtension.Contains("/") ||
+                fileNameWithExtension.Contains("\\"))
+            {
+                throw new ArgumentException("Invalid file name.");
+            }
         }
     }
 }

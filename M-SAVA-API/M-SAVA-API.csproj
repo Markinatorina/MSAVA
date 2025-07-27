@@ -14,6 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="ServiceStack" Version="8.8.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.7" />
   </ItemGroup>
@@ -22,6 +23,10 @@
     <ProjectReference Include="..\M-SAVA-DAL\M-SAVA-DAL.csproj" />
 	<ProjectReference Include="..\M-SAVA-BLL\M-SAVA-BLL.csproj" />
     <ProjectReference Include="..\M-SAVA-INF\M-SAVA-INF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Attributes\" />
   </ItemGroup>
 
 </Project>

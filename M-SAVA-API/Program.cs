@@ -20,7 +20,10 @@ using System.Text.Json;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Register controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<TaintedPathFilter>();
+});
 
 builder.Services.AddAuthorization(options =>
 {

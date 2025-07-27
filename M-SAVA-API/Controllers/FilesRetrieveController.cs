@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using M_SAVA_BLL.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using M_SAVA_API.Attributes;
 
 namespace M_SAVA_API.Controllers
 {
@@ -31,7 +32,7 @@ namespace M_SAVA_API.Controllers
         }
 
         [HttpGet("stream/{**fileNameWithExtension}")]
-        public IActionResult GetFileStreamByPath(string fileNameWithExtension)
+        public IActionResult GetFileStreamByPath([TaintedPathCheck]string fileNameWithExtension)
         {
             return _returnFileService.GetFileStreamByPath(fileNameWithExtension).FileStream;
         }
@@ -45,7 +46,7 @@ namespace M_SAVA_API.Controllers
         }
 
         [HttpGet("physical/{**fileNameWithExtension}")]
-        public IActionResult GetPhysicalFileByPath(string fileNameWithExtension)
+        public IActionResult GetPhysicalFileByPath([TaintedPathCheck]string fileNameWithExtension)
         {
             PhysicalReturnFileDTO fileData = _returnFileService.GetPhysicalFileReturnDataByPath(fileNameWithExtension);
 

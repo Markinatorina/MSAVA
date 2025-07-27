@@ -1,0 +1,21 @@
+# .github/dependabot.yml
+
+version: 2
+
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"               
+    schedule:
+      interval: "weekly"         # Options: daily, weekly, monthly
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    ignore:
+      - dependency-name: "Microsoft.NET.Test.Sdk"
+        versions: [">= 20.0.0"]  
+    reviewers:
+      - "Markinatorina"          
+    labels:
+      - "dependencies"
+      - "dependabot"

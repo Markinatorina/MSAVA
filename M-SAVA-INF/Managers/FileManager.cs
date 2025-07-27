@@ -75,10 +75,11 @@ namespace M_SAVA_INF.Managers
         {
             FileContentUtils.ValidateFileName(fileNameWithExtension);
             string fullPath = FileContentUtils.GetFullPath(fileNameWithExtension);
-            if (!File.Exists(fullPath))
-                throw new FileNotFoundException($"File not found: {fullPath}");
             if(FileContentUtils.IsSafeFileName(fileNameWithExtension) == false)
                 throw new UnauthorizedAccessException($"Unsafe file path: {fileNameWithExtension}");
+            //Only check the full path after the file name is safe and validated
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException($"File not found: {fullPath}");
 
             FileStreamOptions options = FileStreamUtils.GetDefaultFileStreamOptions();
             return GetFileStream(fullPath, options);

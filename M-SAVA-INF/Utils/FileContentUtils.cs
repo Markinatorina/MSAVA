@@ -33,15 +33,12 @@ namespace M_SAVA_INF.Utils
             }
             return true;
         }
-        public static void IsSafeFileName(string fileNameWithExtension)
+        public static bool IsSafeFileName(string fileNameWithExtension)
         {
-            if (string.IsNullOrWhiteSpace(fileNameWithExtension) ||
+            return string.IsNullOrWhiteSpace(fileNameWithExtension) ||
                 fileNameWithExtension.Contains("..") ||
                 fileNameWithExtension.Contains("/") ||
-                fileNameWithExtension.Contains("\\"))
-            {
-                throw new ArgumentException("Invalid file name.");
-            }
+                fileNameWithExtension.Contains("\\");
         }
 
         public static string GetFullPath(string fileNameWithExtension)

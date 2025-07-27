@@ -73,10 +73,11 @@ namespace M_SAVA_INF.Managers
 
         public FileStream GetFileStream(string fileNameWithExtension)
         {
-            FileContentUtils.IsSafeFileName(fileNameWithExtension);
+            if(FileContentUtils.IsSafeFileName(fileNameWithExtension))
+                throw new UnauthorizedAccessException($"Unsafe file name: {fileNameWithExtension}");
             string fullPath = FileContentUtils.GetFullPath(fileNameWithExtension);
             if(FileContentUtils.IsSafeFilePath(fullPath) == false)
-                throw new UnauthorizedAccessException($"Unsafe file path: {fileNameWithExtension}");
+                throw new UnauthorizedAccessException($"Unsafe file path: {fullPath}");
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException($"File not found: {fullPath}");
 

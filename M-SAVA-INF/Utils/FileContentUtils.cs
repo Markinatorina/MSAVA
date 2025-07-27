@@ -20,6 +20,30 @@ namespace M_SAVA_INF.Utils
             string extension = fileExtension.ToString().TrimStart('_').ToLowerInvariant();
             return Path.Combine(FilesDirectory, $"{hashString}.{extension}");
         }
+        public static bool IsSafeFileName(string fullPath)
+        {
+            try
+            {
+                if (!fullPath.StartsWith(FilesDirectory, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+        public static void ValidateFileName(string fileNameWithExtension)
+        {
+            if (string.IsNullOrWhiteSpace(fileNameWithExtension) ||
+                fileNameWithExtension.Contains("..") ||
+                fileNameWithExtension.Contains("/") ||
+                fileNameWithExtension.Contains("\\"))
+            {
+                throw new ArgumentException("Invalid file name.");
+            }
+        }
+
         public static string GetFullPath(string fileNameWithExtension)
         {
             return Path.Combine(FilesDirectory, fileNameWithExtension);

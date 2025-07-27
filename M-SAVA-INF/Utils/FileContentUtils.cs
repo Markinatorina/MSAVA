@@ -20,7 +20,7 @@ namespace M_SAVA_INF.Utils
             string extension = fileExtension.ToString().TrimStart('_').ToLowerInvariant();
             return Path.Combine(FilesDirectory, $"{hashString}.{extension}");
         }
-        public static bool IsSafeFileName(string fullPath)
+        public static bool IsSafeFilePath(string fullPath)
         {
             try
             {
@@ -33,7 +33,7 @@ namespace M_SAVA_INF.Utils
             }
             return true;
         }
-        public static void ValidateFileName(string fileNameWithExtension)
+        public static void IsSafeFileName(string fileNameWithExtension)
         {
             if (string.IsNullOrWhiteSpace(fileNameWithExtension) ||
                 fileNameWithExtension.Contains("..") ||

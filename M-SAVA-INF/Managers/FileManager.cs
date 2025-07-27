@@ -14,12 +14,23 @@ namespace M_SAVA_INF.Managers
 {
     public class FileManager
     {
+        private static readonly string BaseDirectory = Path.GetFullPath("BaseDirectoryPath"); // Replace with actual base directory path
+
         private static bool IsSafeFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 return false;
-            if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
-                return false;
+
+            try
+            {
+                string fullPath = Path.GetFullPath(Path.Combine(BaseDirectory, fileName));
+                if (!fullPath.StartsWith(BaseDirectory, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+            catch
+            {
+                return false; // Invalid path
+            }
             return true;
         }
         public FileManager()

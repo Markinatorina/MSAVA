@@ -14,6 +14,14 @@ namespace M_SAVA_INF.Managers
 {
     public class FileManager
     {
+        private static bool IsSafeFileName(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return false;
+            if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
+                return false;
+            return true;
+        }
         public FileManager()
         {
         }
@@ -73,6 +81,8 @@ namespace M_SAVA_INF.Managers
 
         public FileStream GetFileStream(string fileNameWithExtension)
         {
+            if (!IsSafeFileName(fileNameWithExtension))
+                throw new ArgumentException("Invalid file name: path traversal or separator detected.", nameof(fileNameWithExtension));
             ValidateFileName(fileNameWithExtension);
             string fullPath = FileContentUtils.GetFullPath(fileNameWithExtension);
             if (!File.Exists(fullPath))

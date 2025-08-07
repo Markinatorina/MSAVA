@@ -71,6 +71,68 @@ namespace M_SAVA_INF.Managers
             await File.WriteAllTextAsync(metaPath, metaJson, cancellationToken);
         }
 
+        public async Task SaveTempFileAsync(
+            SavedFileMetaJSON fileMeta,
+            byte[] fileHash,
+            string fileExtension,
+            string tempFilePath,
+            CancellationToken cancellationToken = default,
+            bool overwrite = false)
+        {
+            if (string.IsNullOrWhiteSpace(tempFilePath))
+                throw new ArgumentNullException(nameof(tempFilePath));
+            if (!File.Exists(tempFilePath))
+                throw new FileNotFoundException("Temporary file not found.", tempFilePath);
+
+            string path = FileContentUtils.GetFullPath(fileHash, fileExtension);
+            bool fileExists = File.Exists(path);
+
+            try
+            {
+                using (var tempFileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    bool isValid = FileContentUtils.ValidateFileContent(tempFileStream, fileExtension);
+                    if (!isValid)
+                        throw new ArgumentException("File content does not match the provided extension.");
+                }
+
+                if (overwrite || !fileExists)
+                {
+                    if (fileExists)
+                        File.Delete(path);
+
+                    File.Move(tempFilePath, path);
+                }
+
+                string metaPath = path + ".meta.json";
+                List<SavedFileMetaJSON> metaList = new List<SavedFileMetaJSON>();
+                if (File.Exists(metaPath))
+                {
+                    string existingJson = await File.ReadAllTextAsync(metaPath, cancellationToken);
+                    if (!string.IsNullOrWhiteSpace(existingJson))
+                    {
+                        try
+                        {
+                            List<SavedFileMetaJSON> existingList = JsonSerializer.Deserialize<List<SavedFileMetaJSON>>(existingJson) ?? new List<SavedFileMetaJSON>();
+                            if (existingList != null)
+                                metaList.AddRange(existingList);
+                        }
+                        catch { /* ignore corrupted data, continue */ }
+                    }
+                }
+                metaList.Add(fileMeta);
+                string metaJson = JsonSerializer.Serialize(metaList);
+                await File.WriteAllTextAsync(metaPath, metaJson, cancellationToken);
+            }
+            finally
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    try { File.Delete(tempFilePath); } catch { /* ignore */ }
+                }
+            }
+        }
+
         public FileStream GetFileStream(string fileNameWithExtension)
         {
             string fullPath = FileContentUtils.GetFullPathIfSafe(fileNameWithExtension);

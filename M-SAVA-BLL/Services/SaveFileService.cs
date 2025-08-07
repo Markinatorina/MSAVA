@@ -74,24 +74,47 @@ namespace M_SAVA_BLL.Services
                 sessionUserId = sessionDto.UserId;
             }
 
-            var (fileLength, fileHash, fileBytes, memoryStream) = await FileStreamUtils.ExtractFileStreamData(dto.Stream);
+            string tempFilePath = Path.GetTempFileName();
+            long fileLength = 0;
+            byte[] fileHash;
+            using (var hashAlgorithm = SHA256.Create())
+            {
+                using (var tempFileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var cryptoStream = new CryptoStream(tempFileStream, hashAlgorithm, CryptoStreamMode.Write))
+                {
+                    byte[] buffer = new byte[81920];
+                    int bytesRead;
+                    while ((bytesRead = await dto.Stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                    {
+                        await cryptoStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                        fileLength += bytesRead;
+                    }
+                    await cryptoStream.FlushAsync(cancellationToken);
+                }
+                fileHash = hashAlgorithm.Hash ?? throw new InvalidOperationException("Hash computation failed: hashAlgorithm.Hash is null.");
+            }
 
             SavedFileReferenceDB savedFileDb = MappingUtils.MapSavedFileReferenceDB(
                 dto,
                 fileHash,
-                fileLength
+                (ulong)fileLength
             );
             savedFileDb.Id = Guid.NewGuid();
 
             SavedFileMetaJSON savedFileMetaJSON = MappingUtils.MapSavedFileMetaJSON(savedFileDb);
 
-            memoryStream.Position = 0;
-            await _fileManager.SaveFileContentAsync(savedFileMetaJSON, savedFileDb.FileHash, savedFileDb.FileExtension.ToString(), memoryStream, cancellationToken);
+            await _fileManager.SaveTempFileAsync(
+                savedFileMetaJSON,
+                savedFileDb.FileHash,
+                savedFileDb.FileExtension.ToString(),
+                tempFilePath,
+                cancellationToken
+            );
 
             SavedFileDataDB savedFileDataDb = MappingUtils.MapSavedFileDataDB(
                 dto,
                 savedFileDb,
-                fileLength,
+                (ulong)fileLength,
                 sessionUserId,
                 sessionUserId
             );

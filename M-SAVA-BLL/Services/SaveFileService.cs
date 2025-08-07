@@ -1,28 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using M_SAVA_BLL.Loggers;
+using M_SAVA_BLL.Services.Interfaces;
+using M_SAVA_BLL.Utils;
+using M_SAVA_Core.Models;
 using M_SAVA_DAL.Models;
 using M_SAVA_DAL.Repositories;
-using System.IO;
-using System.Threading;
-using M_SAVA_Core.Models;
-using Microsoft.AspNetCore.Http;
-using System.Security.Cryptography;
-using M_SAVA_BLL.Utils;
-using System.Text.Json;
-using M_SAVA_INF.Managers;
-using M_SAVA_INF.Utils;
-using M_SAVA_INF.Models;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_BLL.Loggers;
 using M_SAVA_DAL.Utils;
-using System.Net.Http;
+using M_SAVA_INF.Managers;
+using M_SAVA_INF.Models;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace M_SAVA_BLL.Services
 {
-    public class SaveFileService : ISaveFileService
+    public class SaveFileService
     {
         private readonly IIdentifiableRepository<SavedFileReferenceDB> _savedRefsRepository;
         private readonly IIdentifiableRepository<SavedFileDataDB> _savedDataRepository;
@@ -50,23 +45,6 @@ namespace M_SAVA_BLL.Services
 
         public async Task<Guid> CreateFileFromStreamAsync(SaveFileFromStreamDTO dto, CancellationToken cancellationToken = default)
         {
-            if (dto == null)
-                throw new ArgumentNullException(nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileName))
-                throw new ArgumentException("FileName must be provided in the DTO.", nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileExtension))
-                throw new ArgumentException("FileExtension must be provided in the DTO.", nameof(dto));
-            if (dto.Stream == null)
-                throw new ArgumentException("Stream must be provided in the DTO.", nameof(dto));
-            if (dto.AccessGroupId == Guid.Empty)
-                throw new ArgumentException("AccessGroupId must be provided in the DTO.", nameof(dto));
-            if (dto.Tags == null)
-                dto.Tags = new List<string>();
-            if (dto.Categories == null)
-                dto.Categories = new List<string>();
-            if (dto.Description == null)
-                dto.Description = string.Empty;
-
             Guid sessionUserId = Guid.Empty;
             HttpContext httpContext = _httpContextAccessor.HttpContext;
             if (httpContext != null && httpContext.Items["SessionDTO"] is SessionDTO sessionDto)
@@ -134,68 +112,83 @@ namespace M_SAVA_BLL.Services
             return savedFileDb.Id;
         }
 
-        public async Task<Guid> CreateFileFromURLAsync(SaveFileFromUrlDTO dto, CancellationToken cancellationToken = default)
+        public async Task<Guid> CreateFileFromTempFileAsync(
+            SaveFileFromFetchDTO dto,
+            CancellationToken cancellationToken = default)
         {
-            if (dto == null)
-                throw new ArgumentNullException(nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileUrl))
-                throw new ArgumentException("FileUrl must be provided.", nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileName))
-                throw new ArgumentException("FileName must be provided.", nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileExtension))
-                throw new ArgumentException("FileExtension must be provided.", nameof(dto));
-            if (dto.AccessGroupId == Guid.Empty)
-                throw new ArgumentException("AccessGroupId must be provided.", nameof(dto));
-
-            var httpClient = _httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync(dto.FileUrl, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
-            var streamDto = new SaveFileFromStreamDTO
+            Guid sessionUserId = Guid.Empty;
+            HttpContext httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null && httpContext.Items["SessionDTO"] is SessionDTO sessionDto)
             {
-                FileName = dto.FileName,
-                FileExtension = dto.FileExtension,
-                Stream = stream,
-                AccessGroupId = dto.AccessGroupId,
-                Tags = dto.Tags ?? new List<string>(),
-                Categories = dto.Categories ?? new List<string>(),
-                Description = dto.Description ?? string.Empty,
-                PublicViewing = dto.PublicViewing,
-                PublicDownload = dto.PublicDownload
-            };
+                sessionUserId = sessionDto.UserId;
+            }
 
-            return await CreateFileFromStreamAsync(streamDto, cancellationToken);
-        }
-
-        public async Task<Guid> CreateFileFromFormFileAsync(SaveFileFromFormFileDTO dto, CancellationToken cancellationToken = default)
-        {
-            if (dto == null)
-                throw new ArgumentNullException(nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileName))
-                throw new ArgumentException("FileName must be provided.", nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.FileExtension))
-                throw new ArgumentException("FileExtension must be provided.", nameof(dto));
-            if (dto.FormFile == null)
-                throw new ArgumentException("FormFile must be provided.", nameof(dto));
-            if (dto.AccessGroupId == Guid.Empty)
-                throw new ArgumentException("AccessGroupId must be provided.", nameof(dto));
-
-            await using var stream = dto.FormFile.OpenReadStream();
-            var streamDto = new SaveFileFromStreamDTO
+            string tempFilePath = dto.TempFilePath;
+            try
             {
-                FileName = dto.FileName,
-                FileExtension = dto.FileExtension,
-                Stream = stream,
-                AccessGroupId = dto.AccessGroupId,
-                Tags = dto.Tags ?? new List<string>(),
-                Categories = dto.Categories ?? new List<string>(),
-                Description = dto.Description ?? string.Empty,
-                PublicViewing = dto.PublicViewing,
-                PublicDownload = dto.PublicDownload
-            };
+                long fileLength = new FileInfo(tempFilePath).Length;
+                byte[] fileHash;
+                using (var hashAlgorithm = SHA256.Create())
+                {
+                    using (var tempFileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var cryptoStream = new CryptoStream(tempFileStream, hashAlgorithm, CryptoStreamMode.Read))
+                    {
+                        byte[] buffer = new byte[81920];
+                        int bytesRead;
+                        while ((bytesRead = await cryptoStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                        {
+                            // Just read to compute hash
+                        }
+                    }
+                    fileHash = hashAlgorithm.Hash ?? throw new InvalidOperationException("Hash computation failed: hashAlgorithm.Hash is null.");
+                }
 
-            return await CreateFileFromStreamAsync(streamDto, cancellationToken);
+                SavedFileReferenceDB savedFileDb = MappingUtils.MapSavedFileReferenceDB(
+                    dto,
+                    fileHash,
+                    (ulong)fileLength
+                );
+                savedFileDb.Id = Guid.NewGuid();
+
+                SavedFileMetaJSON savedFileMetaJSON = MappingUtils.MapSavedFileMetaJSON(savedFileDb);
+
+                await _fileManager.SaveTempFileAsync(
+                    savedFileMetaJSON,
+                    savedFileDb.FileHash,
+                    savedFileDb.FileExtension.ToString(),
+                    tempFilePath,
+                    cancellationToken
+                );
+
+                SavedFileDataDB savedFileDataDb = MappingUtils.MapSavedFileDataDB(
+                    dto,
+                    savedFileDb,
+                    (ulong)fileLength,
+                    sessionUserId,
+                    sessionUserId
+                );
+
+                _savedRefsRepository.Insert(savedFileDb);
+                await _savedRefsRepository.CommitAsync();
+
+                _savedDataRepository.Insert(savedFileDataDb);
+                await _savedDataRepository.CommitAsync();
+
+                string fileName = MappingUtils.GetFileName(savedFileDb);
+                string fileExtension = FileExtensionUtils.GetFileExtension(savedFileDb);
+                string fileNameWithExtension = $"{fileName}{fileExtension}";
+
+                _serviceLogger.WriteLog(AccessLogActions.NewFileCreated, $"File created: {fileNameWithExtension}", sessionUserId, fileNameWithExtension, savedFileDb.Id);
+
+                return savedFileDb.Id;
+            }
+            finally
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    try { File.Delete(tempFilePath); } catch { /* ignore */ }
+                }
+            }
         }
     }
 }

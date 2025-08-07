@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace M_SAVA_BLL.Services.Interfaces
 {
-    public interface ISaveFileService
+    public interface IStoreFileService
     {
         Task<Guid> CreateFileFromStreamAsync(SaveFileFromStreamDTO dto, CancellationToken cancellationToken = default);
         Task<Guid> CreateFileFromURLAsync(

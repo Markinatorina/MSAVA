@@ -94,6 +94,22 @@ namespace M_SAVA_BLL.Utils
             };
         }
 
+        public static SavedFileReferenceDB MapSavedFileReferenceDB(
+            SaveFileFromFetchDTO dto,
+            byte[] fileHash,
+            ulong fileLength)
+        {
+            FileExtensionType extension = MappingUtils.ParseFileExtension(dto.FileExtension);
+            return new SavedFileReferenceDB
+            {
+                Id = Guid.NewGuid(),
+                FileHash = fileHash,
+                FileExtension = extension,
+                PublicDownload = dto.PublicDownload,
+                AccessGroupId = dto.AccessGroupId
+            };
+        }
+
         public static StreamReturnFileDTO MapReturnFileDTO(SavedFileReferenceDB db, byte[]? fileBytes = null, Stream? fileStream = null)
         {
             string fileName = GetFileName(db);
@@ -148,6 +164,43 @@ namespace M_SAVA_BLL.Utils
             string[] tags = (dto.Tags ?? new List<string>()).ToArray();
             string[] categories = (dto.Categories ?? new List<string>()).ToArray();
             JsonDocument metadata = MetadataUtils.ExtractMetadataFromFileStream(dto.Stream, dto.FileExtension);
+
+            return new SavedFileDataDB
+            {
+                Id = Guid.NewGuid(),
+                FileReferenceId = savedFileDb.Id,
+                SizeInBytes = sizeInBytes,
+                SavedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow,
+                LastModifiedById = lastModifiedBy,
+                Checksum = checksum,
+                Name = dto.FileName,
+                Description = dto.Description ?? string.Empty,
+                MimeType = mimeType,
+                FileExtension = dto.FileExtension,
+                Tags = tags,
+                Categories = categories,
+                OwnerId = owner,
+                Metadata = metadata,
+                PublicViewing = dto.PublicViewing,
+                DownloadCount = 0,
+            };
+        }
+
+        public static SavedFileDataDB MapSavedFileDataDB(
+            SaveFileFromFetchDTO dto,
+            SavedFileReferenceDB savedFileDb,
+            ulong sizeInBytes,
+            Guid owner,
+            Guid lastModifiedBy
+        )
+        {
+            string checksum = BitConverter.ToString(savedFileDb.FileHash).Replace("-", "").ToLowerInvariant();
+            string mimeType = MetadataUtils.GetContentType(dto.FileExtension);
+            string[] tags = (dto.Tags ?? new List<string>()).ToArray();
+            string[] categories = (dto.Categories ?? new List<string>()).ToArray();
+            // Todo: Extract metadata from the temp file
+            JsonDocument metadata = JsonDocument.Parse("{}", new JsonDocumentOptions());
 
             return new SavedFileDataDB
             {

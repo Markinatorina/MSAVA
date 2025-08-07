@@ -46,7 +46,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog();
 
-// Write a log reporting Serilog configuration
 Log.Information("Serilog configured with Information level: {InformationLevel}, Rolling Interval: {RollingInterval}, Retained File Count Limit: {RetainedFileCountLimit}, File Size Limit Bytes: {FileSizeLimitBytes}, Roll On File Size Limit: {RollOnFileSizeLimit}",
     env.Values.SerilogInformationLevel, env.Values.SerilogRollingInterval, env.Values.SerilogRetainedFileCountLimit, env.Values.SerilogFileSizeLimitBytes, env.Values.SerilogRollOnFileSizeLimit);
 
@@ -110,10 +109,12 @@ builder.Services.AddHttpClient();
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IReturnFileService, ReturnFileService>();
-builder.Services.AddScoped<ISaveFileService, SaveFileService>();
+builder.Services.AddScoped<IStoreFileService, StoreFileService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<ISearchFileService, SearchFileService>();
 builder.Services.AddScoped<ISeedingService, SeedingService>();
+builder.Services.AddScoped<SaveFileService>();
+builder.Services.AddScoped<FetchFileService>();
 builder.Services.AddScoped<AccessGroupService>();
 builder.Services.AddScoped<InviteCodeService>();
 

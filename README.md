@@ -1,5 +1,5 @@
 # MSAVA
-A .NET-based modular system designed to manage secure or public access to static assets such as documents or image files. This software is available under the terms of the GNU General Public License v2 (GPLv2). Commercial licenses are also available for organizations that prefer not to comply with GPLv2 terms. For commercial licensing, please contact: markinatorina@hotmail.com
+A .NET-based modular system designed to manage secure or public access to static assets such as documents or image files. This software is available under the terms of the GNU General Public License v2 (GPLv2).
 
 # Key features
 * Swagger/OpenAPI Support: View all available endpoints, parameters, and expected responses directly from your browser.

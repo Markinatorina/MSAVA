@@ -114,9 +114,11 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<ISearchFileService, SearchFileService>();
 builder.Services.AddScoped<ISeedingService, SeedingService>();
 builder.Services.AddScoped<SaveFileService>();
-builder.Services.AddScoped<FetchFileService>();
 builder.Services.AddScoped<AccessGroupService>();
 builder.Services.AddScoped<InviteCodeService>();
+builder.Services.AddScoped<FetchYouTubeFileService>();
+builder.Services.AddScoped<FetchGoogleDriveService>();
+// builder.Services.AddScoped<FetchTwitterFileService>(); // Not ready yet
 
 // Register custom loggers
 builder.Services.AddScoped<ServiceLogger>();

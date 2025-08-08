@@ -15,19 +15,45 @@ namespace M_SAVA_API.Controllers
     [Authorize]
     public class FilesFetchController : ControllerBase
     {
-        private readonly FetchFileService _fetchFileService;
+        private readonly FetchYouTubeFileService _fetchYouTubeFileService;
+        private readonly FetchGoogleDriveService _fetchGoogleDriveFileService;
+        private readonly FetchOneDriveService _fetchOneDriveFileService;
 
-        public FilesFetchController(FetchFileService fetchFileService)
+        public FilesFetchController(
+            FetchYouTubeFileService fetchYouTubeFileService,
+            FetchGoogleDriveService fetchGoogleDriveFileService,
+            FetchOneDriveService fetchOneDriveFileService
+        )
         {
-            _fetchFileService = fetchFileService ?? throw new ArgumentNullException(nameof(fetchFileService));
+            _fetchYouTubeFileService = fetchYouTubeFileService ?? throw new ArgumentNullException(nameof(fetchYouTubeFileService));
+            _fetchGoogleDriveFileService = fetchGoogleDriveFileService ?? throw new ArgumentNullException(nameof(fetchGoogleDriveFileService));
+            _fetchOneDriveFileService = fetchOneDriveFileService ?? throw new ArgumentNullException(nameof(fetchOneDriveFileService));
         }
 
-        [HttpPost("youtube")]
+        [HttpPost("youtube/noauth")]
         public async Task<ActionResult<Guid>> CreateFileFromYouTube(
-            [FromBody][Required] SaveFileFromYouTubeDTO dto,
+            [FromBody][Required] FetchFileYouTubeDTO dto,
             CancellationToken cancellationToken = default)
         {
-            var id = await _fetchFileService.CreateFileFromYouTubeAsync(dto, cancellationToken);
+            var id = await _fetchYouTubeFileService.NoAuthFileFetch(dto, cancellationToken);
+            return Ok(id);
+        }
+
+        [HttpPost("googledrive/noauth")]
+        public async Task<ActionResult<Guid>> CreateFileFromGoogleDrive(
+            [FromBody][Required] FetchFileGoogleDriveDTO dto,
+            CancellationToken cancellationToken = default)
+        {
+            var id = await _fetchGoogleDriveFileService.NoAuthFileFetch(dto, cancellationToken);
+            return Ok(id);
+        }
+
+        [HttpPost("onedrive/noauth")]
+        public async Task<ActionResult<Guid>> CreateFileFromOneDrive(
+            [FromBody][Required] FetchFileFromOneDriveDTO dto,
+            CancellationToken cancellationToken = default)
+        {
+            var id = await _fetchOneDriveFileService.NoAuthFileFetch(dto, cancellationToken);
             return Ok(id);
         }
     }

@@ -1,29 +1,33 @@
-﻿using System;
+﻿using M_SAVA_BLL.Loggers;
+using M_SAVA_Core.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_Core.Models;
 using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
-using M_SAVA_BLL.Loggers;
 
 namespace M_SAVA_BLL.Services
 {
-    public class FetchFileService
+    public class FetchYouTubeFileService
     {
         private readonly SaveFileService _saveFileService;
         private readonly ServiceLogger _serviceLogger;
 
-        public FetchFileService(SaveFileService saveFileService, ServiceLogger serviceLogger)
+        public FetchYouTubeFileService(SaveFileService saveFileService, ServiceLogger serviceLogger)
         {
             _saveFileService = saveFileService;
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
         }
 
-        public async Task<Guid> CreateFileFromYouTubeAsync(SaveFileFromYouTubeDTO dto, CancellationToken cancellationToken = default)
+        public async Task<Guid> NoAuthFileFetch(FetchFileYouTubeDTO dto, CancellationToken cancellationToken = default)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto));

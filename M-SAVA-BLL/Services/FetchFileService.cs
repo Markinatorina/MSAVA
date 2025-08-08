@@ -101,7 +101,7 @@ namespace M_SAVA_BLL.Services
                         sw.Stop();
                         _serviceLogger.LogInformation($"Audio download completed in {sw.Elapsed.TotalSeconds:F2} seconds");
 
-                        string args = $"-y -f {videoFormat} -i \"{videoTemp}\" -f {audioFormat} -i \"{audioTemp}\" -c:v copy -c:a aac -shortest \"{muxedTemp}\"";
+                        string args = $"-y -f {videoFormat} -i \"{videoTemp}\" -f {audioFormat} -i \"{audioTemp}\" -c:v copy -c:a aac -shortest -f {fileExtension} \"{muxedTemp}\"";
                         _serviceLogger.LogInformation($"Starting FFmpeg mux: {args}");
 
                         var psi = new System.Diagnostics.ProcessStartInfo

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using M_SAVA_Core.Models;
 using YoutubeExplode;
@@ -16,6 +16,7 @@ namespace M_SAVA_BLL.Services
     {
         private readonly SaveFileService _saveFileService;
         private readonly ServiceLogger _serviceLogger;
+
         public FetchFileService(SaveFileService saveFileService, ServiceLogger serviceLogger)
         {
             _saveFileService = saveFileService;
@@ -35,17 +36,17 @@ namespace M_SAVA_BLL.Services
             var videoId = VideoId.Parse(dto.YouTubeUrl);
             var video = await youtube.Videos.GetAsync(videoId, cancellationToken);
             var streamManifest = await youtube.Videos.Streams.GetManifestAsync(videoId, cancellationToken);
+
             var muxedStreams = streamManifest.GetMuxedStreams().ToList();
             var videoOnlyStreams = streamManifest.GetVideoOnlyStreams().ToList();
             var audioOnlyStreams = streamManifest.GetAudioOnlyStreams().ToList();
 
             string fileName = string.IsNullOrWhiteSpace(video.Title) ? "YouTube Video" : video.Title;
-            string fileExtension = "mp4";
-            string tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".mp4");
+            string fileExtension = "mp4"; // Final output extension for metadata
+            string tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             if (dto.DownloadVideo && dto.DownloadAudio)
             {
-                // Try muxed first
                 MuxedStreamInfo? streamInfo = null;
                 if (!string.IsNullOrWhiteSpace(dto.VideoQuality))
                 {
@@ -61,6 +62,7 @@ namespace M_SAVA_BLL.Services
                         .ThenByDescending(s => s.Bitrate)
                         .FirstOrDefault();
                 }
+
                 if (streamInfo != null)
                 {
                     fileExtension = streamInfo.Container.Name;
@@ -71,73 +73,42 @@ namespace M_SAVA_BLL.Services
                 }
                 else
                 {
-                    // No muxed stream: download video-only and audio-only, then mux with ffmpeg
-                    IVideoStreamInfo? videoStream = null;
-                    IAudioStreamInfo? audioStream = null;
+                    // Separate video & audio → mux
+                    var videoStream = GetBestVideoStream(videoOnlyStreams.Cast<IVideoStreamInfo>(), dto.VideoQuality);
+                    var audioStream = GetBestAudioStream(audioOnlyStreams.Cast<IAudioStreamInfo>(), dto.AudioQuality);
 
-                    if (!string.IsNullOrWhiteSpace(dto.VideoQuality))
-                    {
-                        videoStream = videoOnlyStreams
-                            .Where(s => s.VideoQuality.Label.Equals(dto.VideoQuality, StringComparison.OrdinalIgnoreCase))
-                            .OrderByDescending(s => s.Bitrate)
-                            .FirstOrDefault();
-                    }
-                    if (videoStream == null)
-                    {
-                        videoStream = videoOnlyStreams
-                            .OrderByDescending(s => s.VideoQuality.MaxHeight)
-                            .ThenByDescending(s => s.Bitrate)
-                            .FirstOrDefault();
-                    }
+                    string videoFormat = videoStream.Container.Name;
+                    string audioFormat = audioStream.Container.Name;
 
-                    if (!string.IsNullOrWhiteSpace(dto.AudioQuality))
-                    {
-                        audioStream = audioOnlyStreams
-                            .Where(s => (s.Bitrate.KiloBitsPerSecond + "kbps").Equals(dto.AudioQuality, StringComparison.OrdinalIgnoreCase))
-                            .OrderByDescending(s => s.Bitrate)
-                            .FirstOrDefault();
-                    }
-                    if (audioStream == null)
-                    {
-                        audioStream = audioOnlyStreams
-                            .OrderByDescending(s => s.Bitrate)
-                            .FirstOrDefault();
-                    }
-
-                    if (videoStream == null || audioStream == null)
-                    {
-                        string availableVideo = videoOnlyStreams.Any() ? string.Join(", ", videoOnlyStreams.Select(s => s.VideoQuality.Label)) : "(none)";
-                        string availableAudio = audioOnlyStreams.Any() ? string.Join(", ", audioOnlyStreams.Select(s => s.Bitrate.KiloBitsPerSecond + "kbps")) : "(none)";
-                        throw new InvalidOperationException($"No suitable muxed stream, and could not find both video and audio-only streams. Video qualities: {availableVideo}. Audio qualities: {availableAudio}.");
-                    }
-
-                    // Correct container extensions
-                    string videoExt = videoStream.Container.Name;
-                    string audioExt = audioStream.Container.Name;
-
-                    string videoTemp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + "." + videoExt);
-                    string audioTemp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + "." + audioExt);
+                    string videoTemp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                    string audioTemp = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
                     string muxedTemp = tempFilePath;
                     var ffmpegPath = "ffmpeg";
 
                     try
                     {
-                        _serviceLogger.LogInformation($"Downloading video to {videoTemp} and audio to {audioTemp}");
-
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        _serviceLogger.LogInformation($"Downloading video to {videoTemp}");
                         using (var vfs = new FileStream(videoTemp, FileMode.Create, FileAccess.Write, FileShare.None))
                             await youtube.Videos.Streams.CopyToAsync(videoStream, vfs, null, cancellationToken);
+                        sw.Stop();
+                        _serviceLogger.LogInformation($"Video download completed in {sw.Elapsed.TotalSeconds:F2} seconds");
 
+                        sw.Restart();
+                        _serviceLogger.LogInformation($"Downloading audio to {audioTemp}");
                         using (var afs = new FileStream(audioTemp, FileMode.Create, FileAccess.Write, FileShare.None))
                             await youtube.Videos.Streams.CopyToAsync(audioStream, afs, null, cancellationToken);
+                        sw.Stop();
+                        _serviceLogger.LogInformation($"Audio download completed in {sw.Elapsed.TotalSeconds:F2} seconds");
 
-                        string args = $"-y -i \"{videoTemp}\" -i \"{audioTemp}\" -c:v copy -c:a aac -shortest \"{muxedTemp}\"";
+                        string args = $"-y -f {videoFormat} -i \"{videoTemp}\" -f {audioFormat} -i \"{audioTemp}\" -c:v copy -c:a aac -shortest \"{muxedTemp}\"";
                         _serviceLogger.LogInformation($"Starting FFmpeg mux: {args}");
 
                         var psi = new System.Diagnostics.ProcessStartInfo
                         {
                             FileName = ffmpegPath,
                             Arguments = args,
-                            RedirectStandardError = true, 
+                            RedirectStandardError = true,
                             UseShellExecute = false,
                             CreateNoWindow = true
                         };
@@ -150,8 +121,9 @@ namespace M_SAVA_BLL.Services
                             var stderrTask = process.StandardError.ReadToEndAsync();
 
                             using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                            timeoutCts.CancelAfter(TimeSpan.FromSeconds(15)); 
+                            timeoutCts.CancelAfter(TimeSpan.FromSeconds(15));
 
+                            sw.Restart();
                             try
                             {
                                 await process.WaitForExitAsync(timeoutCts.Token);
@@ -162,6 +134,7 @@ namespace M_SAVA_BLL.Services
                                 _serviceLogger.WriteLog(500, $"FFmpeg process timed out after 15s. Args: {args}", null);
                                 throw new TimeoutException("FFmpeg process exceeded 15 seconds and was terminated.");
                             }
+                            sw.Stop();
 
                             string errorOutput = await stderrTask;
 
@@ -172,14 +145,9 @@ namespace M_SAVA_BLL.Services
                             }
                             else
                             {
-                                _serviceLogger.LogInformation($"FFmpeg mux completed successfully. Output: {muxedTemp}");
+                                _serviceLogger.LogInformation($"FFmpeg mux completed successfully in {sw.Elapsed.TotalSeconds:F2} seconds. Output: {muxedTemp}");
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        _serviceLogger.WriteLog(500, $"Exception during FFmpeg mux: {ex.Message}", null);
-                        throw;
                     }
                     finally
                     {
@@ -190,59 +158,20 @@ namespace M_SAVA_BLL.Services
             }
             else if (dto.DownloadVideo)
             {
-                // Video only
-                IVideoStreamInfo? streamInfo = null;
-                if (!string.IsNullOrWhiteSpace(dto.VideoQuality))
-                {
-                    streamInfo = videoOnlyStreams
-                        .Where(s => s.VideoQuality.Label.Equals(dto.VideoQuality, StringComparison.OrdinalIgnoreCase))
-                        .OrderByDescending(s => s.Bitrate)
-                        .FirstOrDefault();
-                }
-                if (streamInfo == null)
-                {
-                    streamInfo = videoOnlyStreams
-                        .OrderByDescending(s => s.VideoQuality.MaxHeight)
-                        .ThenByDescending(s => s.Bitrate)
-                        .FirstOrDefault();
-                }
-                if (streamInfo == null)
-                {
-                    string availableVideo = videoOnlyStreams.Any() ? string.Join(", ", videoOnlyStreams.Select(s => s.VideoQuality.Label)) : "(none)";
-                    throw new InvalidOperationException($"No suitable video-only stream found. Requested quality: '{dto.VideoQuality ?? "(not specified)"}'. Available video-only qualities: {availableVideo}.");
-                }
-                fileExtension = streamInfo.Container.Name;
+                var videoStream = GetBestVideoStream(videoOnlyStreams, dto.VideoQuality);
+                fileExtension = videoStream.Container.Name;
                 using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await youtube.Videos.Streams.CopyToAsync(streamInfo, fileStream, null, cancellationToken);
+                    await youtube.Videos.Streams.CopyToAsync(videoStream, fileStream, null, cancellationToken);
                 }
             }
             else if (dto.DownloadAudio)
             {
-                // Audio only
-                IAudioStreamInfo? streamInfo = null;
-                if (!string.IsNullOrWhiteSpace(dto.AudioQuality))
-                {
-                    streamInfo = audioOnlyStreams
-                        .Where(s => (s.Bitrate.KiloBitsPerSecond + "kbps").Equals(dto.AudioQuality, StringComparison.OrdinalIgnoreCase))
-                        .OrderByDescending(s => s.Bitrate)
-                        .FirstOrDefault();
-                }
-                if (streamInfo == null)
-                {
-                    streamInfo = audioOnlyStreams
-                        .OrderByDescending(s => s.Bitrate)
-                        .FirstOrDefault();
-                }
-                if (streamInfo == null)
-                {
-                    string availableAudio = audioOnlyStreams.Any() ? string.Join(", ", audioOnlyStreams.Select(s => s.Bitrate.KiloBitsPerSecond + "kbps")) : "(none)";
-                    throw new InvalidOperationException($"No suitable audio-only stream found. Requested quality: '{dto.AudioQuality ?? "(not specified)"}'. Available audio-only qualities: {availableAudio}.");
-                }
-                fileExtension = streamInfo.Container.Name;
+                var audioStream = GetBestAudioStream(audioOnlyStreams, dto.AudioQuality);
+                fileExtension = audioStream.Container.Name;
                 using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
-                    await youtube.Videos.Streams.CopyToAsync(streamInfo, fileStream, null, cancellationToken);
+                    await youtube.Videos.Streams.CopyToAsync(audioStream, fileStream, null, cancellationToken);
                 }
             }
             else
@@ -262,7 +191,40 @@ namespace M_SAVA_BLL.Services
                 PublicViewing = dto.PublicViewing,
                 PublicDownload = dto.PublicDownload
             };
+
             return await _saveFileService.CreateFileFromTempFileAsync(fetchDto, cancellationToken);
+        }
+
+        private static IVideoStreamInfo GetBestVideoStream(IEnumerable<IVideoStreamInfo> streams, string? preferredQuality)
+        {
+            IVideoStreamInfo? stream = null;
+            if (!string.IsNullOrWhiteSpace(preferredQuality))
+            {
+                stream = streams
+                    .Where(s => s.VideoQuality.Label.Equals(preferredQuality, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(s => s.Bitrate)
+                    .FirstOrDefault();
+            }
+            return stream ?? streams
+                .OrderByDescending(s => s.VideoQuality.MaxHeight)
+                .ThenByDescending(s => s.Bitrate)
+                .FirstOrDefault()
+                ?? throw new InvalidOperationException("No suitable video-only stream found.");
+        }
+        private static IAudioStreamInfo GetBestAudioStream(IEnumerable<IAudioStreamInfo> streams, string? preferredQuality)
+        {
+            IAudioStreamInfo? stream = null;
+            if (!string.IsNullOrWhiteSpace(preferredQuality))
+            {
+                stream = streams
+                    .Where(s => (s.Bitrate.KiloBitsPerSecond + "kbps").Equals(preferredQuality, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(s => s.Bitrate)
+                    .FirstOrDefault();
+            }
+            return stream ?? streams
+                .OrderByDescending(s => s.Bitrate)
+                .FirstOrDefault()
+                ?? throw new InvalidOperationException("No suitable audio-only stream found.");
         }
     }
 }

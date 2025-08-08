@@ -93,7 +93,7 @@ namespace M_SAVA_BLL.Services
                 throw new InvalidOperationException("Failed to build a download URL for the requested Google Drive file.");
 
             var tempFilePath = Path.GetTempFileName();
-            _serviceLogger.LogInformation($"Downloading Google Drive file {fileId} to temp path {tempFilePath}");
+            _serviceLogger.LogInformation($"Downloading Google Drive file {_serviceLogger.SanitizeString(fileId)} to temp path {tempFilePath}");
 
             var contentTypeHeader = string.Empty;
             var finalExtension = "bin";

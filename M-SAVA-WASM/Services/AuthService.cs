@@ -57,7 +57,7 @@ namespace M_SAVA_WASM.Services
                 result.ErrorMessage = "Username and password are required.";
                 return result;
             }
-            var response = await _httpClient.PostAsJsonAsync("https://localhost:44395/api/auth/login", loginRequest);
+            var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginRequest);
             if (response.IsSuccessStatusCode)
             {
                 var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponseDTO>();
@@ -94,7 +94,7 @@ namespace M_SAVA_WASM.Services
                 result.ErrorMessage = "Invite code must be a valid GUID.";
                 return result;
             }
-            var response = await _httpClient.PostAsJsonAsync("https://localhost:44395/api/auth/register", registerRequest);
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerRequest);
             if (response.IsSuccessStatusCode)
             {
                 result.Success = true;

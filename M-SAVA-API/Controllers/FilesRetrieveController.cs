@@ -28,13 +28,21 @@ namespace M_SAVA_API.Controllers
         [HttpGet("stream/{refId:guid}")]
         public IActionResult GetFileStreamById(Guid refId)
         {
-            return _returnFileService.GetFileStreamById(refId).FileStream;
+            var dto = _returnFileService.GetFileStreamById(refId);
+            return new FileStreamResult(dto.FileStream, "application/octet-stream")
+            {
+                FileDownloadName = $"{dto.FileName}{dto.FileExtension}"
+            };
         }
 
         [HttpGet("stream/{**fileNameWithExtension}")]
         public IActionResult GetFileStreamByPath([TaintedPathCheck]string fileNameWithExtension)
         {
-            return _returnFileService.GetFileStreamByPath(fileNameWithExtension).FileStream;
+            var dto = _returnFileService.GetFileStreamByPath(fileNameWithExtension);
+            return new FileStreamResult(dto.FileStream, "application/octet-stream")
+            {
+                FileDownloadName = $"{dto.FileName}{dto.FileExtension}"
+            };
         }
 
         [HttpGet("physical/{refId:guid}")]

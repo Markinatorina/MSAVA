@@ -1,0 +1,58 @@
+﻿@page "/auth/register"
+@using MudBlazor
+@using M_SAVA_Core.Models
+@inject M_SAVA_WASM.Services.AuthService AuthService
+@inject NavigationManager NavigationManager
+@using System.ComponentModel.DataAnnotations
+
+<h3>Register</h3>
+
+<EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+    <MudPaper Class="pa-4 mx-auto" Style="max-width:400px;">
+
+        <MudTextField @bind-Value="registerModel.Username" Label="Username" Required="true" Variant="Variant.Outlined"
+            Margin="Margin.Normal" />
+        <MudTextField @bind-Value="registerModel.Password" Label="Password" Required="true" Variant="Variant.Outlined"
+            Margin="Margin.Normal" InputType="InputType.Password" />
+        <MudTextField @bind-Value="inviteCodeInput" Label="Invite Code (GUID)" Required="true" Variant="Variant.Outlined"
+            Margin="Margin.Normal" />
+        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" Class="mt-4"
+            FullWidth="true">Register</MudButton>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <MudText Color="Color.Error">@errorMessage</MudText>
+        }
+        @if (success)
+        {
+            <MudText Color="Color.Success">Registration successful! You can now <MudLink Href="/auth/login">login</MudLink>.</MudText>
+        }
+    </MudPaper>
+</EditForm>
+
+@code {
+    private RegisterRequestDTO registerModel = new() { Username = string.Empty, Password = string.Empty, InviteCode = Guid.Empty };
+    private string inviteCodeInput = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool success = false;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty;
+        success = false;
+        if (!Guid.TryParse(inviteCodeInput, out var inviteGuid))
+        {
+            errorMessage = "Invite code must be a valid GUID.";
+            return;
+        }
+        registerModel.InviteCode = inviteGuid;
+        var result = await AuthService.RegisterAsync(registerModel);
+        if (result.Success)
+        {
+            success = true;
+        }
+        else
+        {
+            errorMessage = result.ErrorMessage;
+        }
+    }
+}

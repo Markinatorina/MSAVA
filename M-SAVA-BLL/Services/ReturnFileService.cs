@@ -110,7 +110,7 @@ namespace M_SAVA_BLL.Services
             {
                 FileName = fileName,
                 FileExtension = extension,
-                FileStream = new FileStreamResult(fileStream, contentType)
+                FileStream = fileStream
             };
         }
 

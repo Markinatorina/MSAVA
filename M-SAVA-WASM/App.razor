@@ -1,6 +1,10 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@using M_SAVA_WASM.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <AuthRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
@@ -10,3 +14,7 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+
+}

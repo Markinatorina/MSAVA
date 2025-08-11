@@ -8,7 +8,7 @@ namespace M_SAVA_Core.Models
     {
         public required string FileName { get; set; }
         public required string FileExtension { get; set; }
-        public required IFormFile FormFile { get; set; } = null!;
+        public IFormFile FormFile { get; set; } = null!;
         public required Guid AccessGroupId { get; set; }
         public List<string>? Tags { get; set; } = [];
         public List<string>? Categories { get; set; } = [];

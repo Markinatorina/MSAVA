@@ -139,10 +139,7 @@ namespace M_SAVA_BLL.Utils
                 Id = db.Id,
                 FileName = fileName,
                 FileExtension = fileExtension,
-                FileStream = new FileStreamResult(stream, contentType)
-                {
-                    FileDownloadName = fileName
-                }
+                FileStream = stream,
             };
         }
 

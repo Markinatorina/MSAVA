@@ -18,6 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+  	<PackageReference Include="Microsoft.NET.Sdk.WebAssembly.Pack" Version="9.0.8" />
     <ProjectReference Include="..\M-SAVA-Core\M-SAVA-Core.csproj" />
   </ItemGroup>
 

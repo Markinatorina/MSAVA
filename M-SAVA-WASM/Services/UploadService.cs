@@ -47,7 +47,7 @@ namespace M_SAVA_WASM.Services
                     content.Add(new StringContent(cat), "Categories");
             var fileContent = new StreamContent(file.OpenReadStream(file.Size));
             content.Add(fileContent, nameof(dto.FormFile), file.Name);
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:44395/api/files/store/formfile")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/files/store/formfile")
             {
                 Content = content
             };
@@ -77,7 +77,7 @@ namespace M_SAVA_WASM.Services
                 foreach (var cat in dto.Categories)
                     dict.Add("Categories", cat);
             var content = new FormUrlEncodedContent(dict);
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:44395/api/files/store/url")
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/files/store/url")
             {
                 Content = content
             };

@@ -15,6 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+WRITTEN OFFER
+
+The source code for any program binaries or compressed scripts that are
+included with M-SAVA can be freely obtained at the following URL:
+https://github.com/Markinatorina/MSAVA
 
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
@@ -692,9 +699,3 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
-
-WRITTEN OFFER
-
-The source code for any program binaries or compressed scripts that are
-included with M-SAVA can be freely obtained at the following URL:
-https://github.com/Markinatorina/MSAVA

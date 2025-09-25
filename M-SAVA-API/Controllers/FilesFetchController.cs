@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_Core.Models;
-using M_SAVA_BLL.Services;
+using M_SAVA_Shared.Models;
 using System.ComponentModel.DataAnnotations;
+using M_SAVA_BLL.Services.Fetch;
 
 namespace M_SAVA_API.Controllers
 {

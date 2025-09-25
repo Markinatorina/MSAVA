@@ -9,8 +9,6 @@ namespace M_SAVA_DAL.Repositories
 {
     public interface IBaseRepository<T> where T : class
     {
-        void Commit();
-        Task CommitAsync();
         void SaveChanges();
         Task SaveChangesAsync();
 

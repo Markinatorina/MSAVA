@@ -14,7 +14,7 @@ namespace M_SAVA_DAL.Repositories
         T GetById(Guid id);
         Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-        T GetByIdWithTracking(Guid id);
+        T GetByIdAsTracked(Guid id);
 
         T GetById(Guid id, params Expression<Func<T, object>>[] includes);
         Task<T> GetByIdAsync(Guid id, params Expression<Func<T, object>>[] includes);

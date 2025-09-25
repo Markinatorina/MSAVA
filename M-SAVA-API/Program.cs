@@ -19,6 +19,10 @@ using System.Text.Json;
 using Serilog;
 using Serilog.Events;
 using M_SAVA_BLL.Loggers;
+using M_SAVA_BLL.Services.Fetch;
+using M_SAVA_BLL.Services.Persistence;
+using M_SAVA_BLL.Services.Retrieval;
+using M_SAVA_BLL.Services.Access;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -108,12 +112,12 @@ builder.Services.AddHttpClient();
 
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IReturnFileService, ReturnFileService>();
-builder.Services.AddScoped<IStoreFileService, StoreFileService>();
+builder.Services.AddScoped<IReturnFileService, FileReturnService>();
+builder.Services.AddScoped<IStoreFileService, FileUploadService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<ISearchFileService, SearchFileService>();
+builder.Services.AddScoped<ISearchFileService, FileSearchService>();
 builder.Services.AddScoped<ISeedingService, SeedingService>();
-builder.Services.AddScoped<SaveFileService>();
+builder.Services.AddScoped<FileWriteService>();
 builder.Services.AddScoped<AccessGroupService>();
 builder.Services.AddScoped<InviteCodeService>();
 builder.Services.AddScoped<FetchYouTubeFileService>();

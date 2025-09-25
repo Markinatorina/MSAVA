@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using M_SAVA_Core.Models;
+using M_SAVA_Shared.Models;
 using M_SAVA_BLL.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 

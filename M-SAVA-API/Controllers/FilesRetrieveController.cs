@@ -1,4 +1,4 @@
-﻿using M_SAVA_Core.Models;
+﻿using M_SAVA_Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

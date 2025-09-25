@@ -60,7 +60,7 @@ namespace M_SAVA_BLL.Services
                     CreatedAt = DateTime.UtcNow
                 };
                 _userRepo.Insert(adminUser);
-                _userRepo.Commit();
+                _userRepo.SaveChanges();
                 _serviceLogger.WriteLog(UserLogAction.AccountCreation, $"Admin user '{adminUsername}' created during seeding.", adminUser.Id, null);
             }
             return adminUser.Id;

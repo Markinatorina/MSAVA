@@ -1,4 +1,4 @@
-﻿using M_SAVA_Core.Models;
+﻿using M_SAVA_Shared.Models;
 using M_SAVA_DAL.Models;
 using M_SAVA_DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -63,7 +63,7 @@ namespace M_SAVA_API.Middleware
                 UserId = userId
             };
             errorLogRepository.Insert(errorLog);
-            errorLogRepository.Commit();
+            errorLogRepository.SaveChanges();
         }
 
         private static int GetStatusCode(Exception exception)

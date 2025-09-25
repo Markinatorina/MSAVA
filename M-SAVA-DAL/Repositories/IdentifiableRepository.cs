@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace M_SAVA_DAL.Repositories
@@ -20,60 +20,79 @@ namespace M_SAVA_DAL.Repositories
         public T GetById(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException("Repository: id cannot be empty.", nameof(id));
-            return _entities.AsNoTracking().SingleOrDefault(s => s.Id == id)
-                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+
+            var result = _entities.AsNoTracking().SingleOrDefault(s => s.Id == id);
+            if (result == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            return result;
         }
 
-        public T GetByIdWithTracking(Guid id)
+        public T GetByIdAsTracked(Guid id)
         {
             if (id == Guid.Empty) throw new ArgumentException("Repository: id cannot be empty.", nameof(id));
-            return _entities.SingleOrDefault(s => s.Id == id)
-                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+
+            var result = _entities.SingleOrDefault(s => s.Id == id);
+            if (result == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            return result;
         }
 
         public async Task<T> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             if (id == Guid.Empty) throw new ArgumentException("Repository: id cannot be empty.", nameof(id));
-            return await _entities.AsNoTracking().SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
-                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+
+            var result = await _entities.AsNoTracking().SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
+            if (result == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            return result;
         }
 
         public T GetById(Guid id, params Expression<Func<T, object>>[] includes)
         {
             if (id == Guid.Empty) throw new ArgumentException("Repository: id cannot be empty.", nameof(id));
-            if (includes == null) throw new ArgumentNullException(nameof(includes), "Repository: includes cannot be null.");
-            var query = _entities.AsNoTracking().AsQueryable();
 
-            foreach (var include in includes)
+            IQueryable<T> query = _entities.AsNoTracking();
+
+            if (includes != null && includes.Length > 0)
             {
-                if (include == null) throw new ArgumentNullException(nameof(include), "Repository: include expression cannot be null.");
-                query = query.Include(include);
+                foreach (var include in includes)
+                {
+                    if (include == null) continue;
+                    query = query.Include(include);
+                }
             }
 
-            return query.SingleOrDefault(s => s.Id == id)
-                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            var result = query.SingleOrDefault(s => s.Id == id);
+            if (result == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            return result;
         }
 
         public async Task<T> GetByIdAsync(Guid id, params Expression<Func<T, object>>[] includes)
         {
             if (id == Guid.Empty) throw new ArgumentException("Repository: id cannot be empty.", nameof(id));
-            if (includes == null) throw new ArgumentNullException(nameof(includes), "Repository: includes cannot be null.");
-            var query = _entities.AsNoTracking().AsQueryable();
 
-            foreach (var include in includes)
+            IQueryable<T> query = _entities.AsNoTracking();
+
+            if (includes != null && includes.Length > 0)
             {
-                if (include == null) throw new ArgumentNullException(nameof(include), "Repository: include expression cannot be null.");
-                query = query.Include(include);
+                foreach (var include in includes)
+                {
+                    if (include == null) continue;
+                    query = query.Include(include);
+                }
             }
 
-            return await query.SingleOrDefaultAsync(s => s.Id == id)
-                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            var result = await query.SingleOrDefaultAsync(s => s.Id == id);
+            if (result == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            return result;
         }
 
         public IQueryable<T> GetRangeByIds(IEnumerable<Guid> ids)
         {
             if (ids == null) throw new ArgumentNullException(nameof(ids), "Repository: ids cannot be null.");
-            var idList = ids.ToList();
+            var idList = ids as IList<Guid> ?? ids.ToList();
             if (!idList.Any())
                 return Enumerable.Empty<T>().AsQueryable();
 
@@ -111,9 +130,10 @@ namespace M_SAVA_DAL.Repositories
         public void DeleteRangeByIds(IEnumerable<Guid> ids)
         {
             if (ids == null) throw new ArgumentNullException(nameof(ids), "Repository: ids cannot be null.");
-            var idList = ids.ToList();
+            var idList = ids as IList<Guid> ?? ids.ToList();
             if (!idList.Any())
                 return;
+
             var entitiesToDelete = _entities.Where(entity => idList.Contains(entity.Id)).ToList();
             if (entitiesToDelete.Any())
             {
@@ -128,9 +148,10 @@ namespace M_SAVA_DAL.Repositories
         public async Task DeleteRangeByIdsAsync(IEnumerable<Guid> ids)
         {
             if (ids == null) throw new ArgumentNullException(nameof(ids), "Repository: ids cannot be null.");
-            var idList = ids.ToList();
+            var idList = ids as IList<Guid> ?? ids.ToList();
             if (!idList.Any())
                 return;
+
             var entitiesToDelete = await _entities.Where(entity => idList.Contains(entity.Id)).ToListAsync();
             if (entitiesToDelete.Any())
             {

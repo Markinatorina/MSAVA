@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using M_SAVA_Core.Models;
+using M_SAVA_Shared.Models;
 using M_SAVA_BLL.Utils;
 using M_SAVA_DAL.Models;
 using System;
@@ -19,11 +19,11 @@ namespace M_SAVA_API.Controllers
     [Authorize]
     public class FilesStoreController : ControllerBase
     {
-        private readonly IStoreFileService _storeFileService;
+        private readonly IStoreFileService _uploadService;
 
         public FilesStoreController(IStoreFileService saveFileService)
         {
-            _storeFileService = saveFileService ?? throw new ArgumentNullException(nameof(saveFileService));
+            _uploadService = saveFileService ?? throw new ArgumentNullException(nameof(saveFileService));
         }
 
         [HttpPost("stream")]
@@ -52,7 +52,7 @@ namespace M_SAVA_API.Controllers
                 Stream = Request.Body
             };
 
-            Guid id = await _storeFileService.CreateFileFromStreamAsync(dto, cancellationToken);
+            Guid id = await _uploadService.CreateFileFromStreamAsync(dto, cancellationToken);
             return Ok(id);
         }
 
@@ -61,7 +61,7 @@ namespace M_SAVA_API.Controllers
             [FromForm][Required] SaveFileFromUrlDTO dto,
             CancellationToken cancellationToken = default)
         {
-            var id = await _storeFileService.CreateFileFromURLAsync(dto, cancellationToken);
+            var id = await _uploadService.CreateFileFromURLAsync(dto, cancellationToken);
             return Ok(id);
         }
 
@@ -71,7 +71,7 @@ namespace M_SAVA_API.Controllers
             [FromForm][Required] SaveFileFromFormFileDTO dto,
             CancellationToken cancellationToken = default)
         {
-            var id = await _storeFileService.CreateFileFromFormFileAsync(dto, cancellationToken);
+            var id = await _uploadService.CreateFileFromFormFileAsync(dto, cancellationToken);
             return Ok(id);
         }
     }

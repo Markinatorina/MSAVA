@@ -1,24 +1,23 @@
 ﻿using M_SAVA_Shared.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace M_SAVA_BLL.Services.Interfaces
 {
     public interface ISearchFileService
     {
-        List<Guid> GetFileGuidsByTag(string tag);
-        List<Guid> GetFileGuidsByCategory(string category);
-        List<Guid> GetFileGuidsByName(string name);
-        List<Guid> GetFileGuidsByDescription(string description);
-        List<Guid> GetFileGuidsByAllFields(string? tag, string? category, string? name, string? description);
+        Task<List<Guid>> GetFileGuidsByTagAsync(string tag, CancellationToken cancellationToken = default);
+        Task<List<Guid>> GetFileGuidsByCategoryAsync(string category, CancellationToken cancellationToken = default);
+        Task<List<Guid>> GetFileGuidsByNameAsync(string name, CancellationToken cancellationToken = default);
+        Task<List<Guid>> GetFileGuidsByDescriptionAsync(string description, CancellationToken cancellationToken = default);
+        Task<List<Guid>> GetFileGuidsByAllFieldsAsync(string? tag, string? category, string? name, string? description, CancellationToken cancellationToken = default);
 
-        List<SearchFileDataDTO> GetFileDataByTag(string tag);
-        List<SearchFileDataDTO> GetFileDataByCategory(string category);
-        List<SearchFileDataDTO> GetFileDataByName(string name);
-        List<SearchFileDataDTO> GetFileDataByDescription(string description);
-        List<SearchFileDataDTO> GetFileDataByAllFields(string? tag, string? category, string? name, string? description);
+        Task<List<SearchFileDataDTO>> GetFileDataByTagAsync(string tag, CancellationToken cancellationToken = default);
+        Task<List<SearchFileDataDTO>> GetFileDataByCategoryAsync(string category, CancellationToken cancellationToken = default);
+        Task<List<SearchFileDataDTO>> GetFileDataByNameAsync(string name, CancellationToken cancellationToken = default);
+        Task<List<SearchFileDataDTO>> GetFileDataByDescriptionAsync(string description, CancellationToken cancellationToken = default);
+        Task<List<SearchFileDataDTO>> GetFileDataByAllFieldsAsync(string? tag, string? category, string? name, string? description, CancellationToken cancellationToken = default);
     }
 }

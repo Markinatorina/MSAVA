@@ -63,12 +63,6 @@ namespace M_SAVA_BLL.Services.Access
             return userDb;
         }
 
-        public async Task<UserDTO> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            var userDb = await _userRepository.GetByIdAsync(id, u => u.AccessGroups);
-            return MappingUtils.MapUserDTOWithRelationships(userDb);
-        }
-
         public List<UserDTO> GetAllUsers()
         {
             var userDbs = _userRepository.GetAllAsReadOnly().ToList();
@@ -79,13 +73,6 @@ namespace M_SAVA_BLL.Services.Access
         {
             _userRepository.DeleteById(id);
             _userRepository.SaveChanges();
-            _serviceLogger.WriteLog(UserLogAction.AccountDeletion, $"User deleted: {id}", id, null);
-        }
-
-        public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            await _userRepository.DeleteByIdAsync(id);
-            await _userRepository.SaveChangesAsync();
             _serviceLogger.WriteLog(UserLogAction.AccountDeletion, $"User deleted: {id}", id, null);
         }
 

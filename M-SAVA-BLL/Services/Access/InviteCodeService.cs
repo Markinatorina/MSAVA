@@ -70,9 +70,9 @@ namespace M_SAVA_BLL.Services.Access
             return _inviteCodeRepository.GetAllAsReadOnly().ToList();
         }
 
-        public async Task<InviteCodeDB?> GetInviteCodeById(Guid inviteCodeId)
+        public InviteCodeDB GetInviteCodeById(Guid inviteCodeId)
         {
-            return await _inviteCodeRepository.GetByIdAsync(inviteCodeId);
+            return _inviteCodeRepository.GetById(inviteCodeId);
         }
     }
 }

@@ -11,10 +11,8 @@ namespace M_SAVA_BLL.Services.Interfaces
     public interface IUserService
     {
         UserDTO GetUserById(Guid id);
-        Task<UserDTO> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default);
         List<UserDTO> GetAllUsers();
         void DeleteUser(Guid id);
-        Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
         bool IsSessionUserAdmin();
         UserDTO GetSessionUser();
         Guid GetSessionUserId();

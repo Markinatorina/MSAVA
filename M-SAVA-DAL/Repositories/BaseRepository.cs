@@ -49,6 +49,26 @@ namespace M_SAVA_DAL.Repositories
             return _entities.AsNoTracking();
         }
 
+        public Task<List<T>> GetFilteredAsync(
+            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
+            CancellationToken cancellationToken = default)
+        {
+            IQueryable<T> q = _entities;
+            if (queryShaper != null) q = queryShaper(q);
+            return q.AsNoTracking().ToListAsync(cancellationToken);
+        }
+
+        public Task<List<TResult>> GetFilteredAsync<TResult>(
+            Expression<Func<T, TResult>> selector,
+            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (selector == null) throw new ArgumentNullException(nameof(selector));
+            IQueryable<T> q = _entities;
+            if (queryShaper != null) q = queryShaper(q);
+            return q.AsNoTracking().Select(selector).ToListAsync(cancellationToken);
+        }
+
         public void Insert(T entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity), "Repository: Parameter entity is null.");
@@ -106,24 +126,36 @@ namespace M_SAVA_DAL.Repositories
             _entities.AddRange(entity);
         }
 
-        public void DeleteRange(IEnumerable<T> entity)
+        public void DeleteRange(IEnumerable<T> entities)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity), "Repository: Parameter entity is null.");
+            if (entities == null) throw new ArgumentNullException(nameof(entities), "Repository: Parameter entity is null.");
+            
+            if (entities is ICollection<T> col && col.Count == 0) return;
+            if (!entities.Any()) return;
 
-            if (entity is ICollection<T> col && col.Count == 0) return;
-            if (!entity.Any()) return;
-
-            _entities.RemoveRange(entity);
+            _entities.RemoveRange(entities);
         }
 
-        public void UpdateRange(IEnumerable<T> entity)
+        public void UpdateRange(IEnumerable<T> entities)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity), "Repository: Parameter entity is null.");
+            if (entities == null) throw new ArgumentNullException(nameof(entities), "Repository: Parameter entity is null.");
+            if (entities is ICollection<T> col && col.Count == 0) return;
+            if (!entities.Any()) return;
 
-            if (entity is ICollection<T> col && col.Count == 0) return;
-            if (!entity.Any()) return;
-
-            _entities.UpdateRange(entity);
+            // Attach each and mark modified to avoid surprising bulk semantics of UpdateRange.
+            foreach (var e in entities)
+            {
+                var entry = _context.Entry(e);
+                if (entry.State == EntityState.Detached)
+                {
+                    _context.Attach(e);
+                    _context.Entry(e).State = EntityState.Modified;
+                }
+                else
+                {
+                    entry.State = EntityState.Modified;
+                }
+            }
         }
 
         public void Attach(T entity)

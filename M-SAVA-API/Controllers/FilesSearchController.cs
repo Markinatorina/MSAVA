@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using M_SAVA_BLL.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace M_SAVA_API.Controllers
 {
@@ -23,63 +25,73 @@ namespace M_SAVA_API.Controllers
         }
 
         [HttpGet("byAll/id")]
-        public ActionResult<List<Guid>> SearchFileGuidsByAllFields([FromQuery] string? tag, [FromQuery] string? category, [FromQuery] string? name, [FromQuery] string? description)
+        public async Task<ActionResult<List<Guid>>> SearchFileGuidsByAllFields([FromQuery] string? tag, [FromQuery] string? category, [FromQuery] string? name, [FromQuery] string? description, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileGuidsByAllFields(tag, category, name, description));
+            var result = await _searchFileService.GetFileGuidsByAllFieldsAsync(tag, category, name, description, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byTag/id")]
-        public ActionResult<List<Guid>> SearchFileGuidsByTag([FromQuery][Required] string tag)
+        public async Task<ActionResult<List<Guid>>> SearchFileGuidsByTag([FromQuery][Required] string tag, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileGuidsByTag(tag));
+            var result = await _searchFileService.GetFileGuidsByTagAsync(tag, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byCategory/id")]
-        public ActionResult<List<Guid>> SearchFileGuidsByCategory([FromQuery][Required] string category)
+        public async Task<ActionResult<List<Guid>>> SearchFileGuidsByCategory([FromQuery][Required] string category, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileGuidsByCategory(category));
+            var result = await _searchFileService.GetFileGuidsByCategoryAsync(category, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byName/id")]
-        public ActionResult<List<Guid>> SearchFileGuidsByName([FromQuery][Required] string name)
+        public async Task<ActionResult<List<Guid>>> SearchFileGuidsByName([FromQuery][Required] string name, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileGuidsByName(name));
+            var result = await _searchFileService.GetFileGuidsByNameAsync(name, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byDescription/id")]
-        public ActionResult<List<Guid>> SearchFileGuidsByDescription([FromQuery][Required] string description)
+        public async Task<ActionResult<List<Guid>>> SearchFileGuidsByDescription([FromQuery][Required] string description, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileGuidsByDescription(description));
+            var result = await _searchFileService.GetFileGuidsByDescriptionAsync(description, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byAll/data")]
-        public ActionResult<List<SearchFileDataDTO>> SearchFilesByAllFields([FromQuery] string? tag, [FromQuery] string? category, [FromQuery] string? name, [FromQuery] string? description)
+        public async Task<ActionResult<List<SearchFileDataDTO>>> SearchFilesByAllFields([FromQuery] string? tag, [FromQuery] string? category, [FromQuery] string? name, [FromQuery] string? description, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileDataByAllFields(tag, category, name, description));
+            var result = await _searchFileService.GetFileDataByAllFieldsAsync(tag, category, name, description, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byTag/data")]
-        public ActionResult<List<SearchFileDataDTO>> SearchFilesByTag([FromQuery][Required] string tag)
+        public async Task<ActionResult<List<SearchFileDataDTO>>> SearchFilesByTag([FromQuery][Required] string tag, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileDataByTag(tag));
+            var result = await _searchFileService.GetFileDataByTagAsync(tag, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byCategory/data")]
-        public ActionResult<List<SearchFileDataDTO>> SearchFilesByCategory([FromQuery][Required] string category)
+        public async Task<ActionResult<List<SearchFileDataDTO>>> SearchFilesByCategory([FromQuery][Required] string category, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileDataByCategory(category));
+            var result = await _searchFileService.GetFileDataByCategoryAsync(category, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byName/data")]
-        public ActionResult<List<SearchFileDataDTO>> SearchFilesByName([FromQuery][Required] string name)
+        public async Task<ActionResult<List<SearchFileDataDTO>>> SearchFilesByName([FromQuery][Required] string name, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileDataByName(name));
+            var result = await _searchFileService.GetFileDataByNameAsync(name, cancellationToken);
+            return Ok(result);
         }
 
         [HttpGet("byDescription/data")]
-        public ActionResult<List<SearchFileDataDTO>> SearchFilesByDescription([FromQuery][Required] string description)
+        public async Task<ActionResult<List<SearchFileDataDTO>>> SearchFilesByDescription([FromQuery][Required] string description, CancellationToken cancellationToken)
         {
-            return Ok(_searchFileService.GetFileDataByDescription(description));
+            var result = await _searchFileService.GetFileDataByDescriptionAsync(description, cancellationToken);
+            return Ok(result);
         }
     }
 }

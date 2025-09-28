@@ -22,10 +22,10 @@ namespace M_SAVA_API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult> CreateAccessGroup(
+        public ActionResult CreateAccessGroup(
             [FromQuery][Required] string name)
         {
-            var id = await _accessGroupService.CreateAccessGroupAsync(name);
+            var id = _accessGroupService.CreateAccessGroup(name);
             return Ok(id);
         }
 

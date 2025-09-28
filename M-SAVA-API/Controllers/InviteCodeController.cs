@@ -46,9 +46,9 @@ namespace M_SAVA_API.Controllers
 
         [HttpGet("{inviteCodeId:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> GetInviteCodeById(Guid inviteCodeId)
+        public ActionResult GetInviteCodeById(Guid inviteCodeId)
         {
-            var code = await _inviteCodeService.GetInviteCodeById(inviteCodeId);
+            var code = _inviteCodeService.GetInviteCodeById(inviteCodeId);
             if (code == null)
                 return NotFound();
             return Ok(code);

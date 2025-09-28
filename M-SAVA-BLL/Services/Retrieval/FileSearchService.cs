@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using M_SAVA_BLL.Services.Interfaces;
@@ -16,143 +17,187 @@ namespace M_SAVA_BLL.Services.Retrieval
     {
         private readonly IIdentifiableRepository<SavedFileDataDB> _dataRepository;
 
+        // DTO selector
+        private static readonly Expression<Func<SavedFileDataDB, SearchFileDataDTO>> SearchFileDataSelector = f =>
+            new SearchFileDataDTO
+            {
+                DataId = f.Id,
+                RefId = f.FileReferenceId,
+                FilePath = f.FileReference != null ? f.FileReference.FileExtension.ToString() : string.Empty,
+                Name = f.Name,
+                Description = f.Description,
+                MimeType = f.MimeType,
+                FileExtension = f.FileExtension,
+                Tags = f.Tags,
+                Categories = f.Categories,
+                SizeInBytes = f.SizeInBytes,
+                Checksum = f.Checksum,
+                Metadata = f.Metadata,
+                PublicViewing = f.PublicViewing,
+                DownloadCount = f.DownloadCount,
+                SavedAt = f.SavedAt,
+                LastModifiedAt = f.LastModifiedAt,
+                OwnerId = f.OwnerId,
+                LastModifiedById = f.LastModifiedById
+            };
+
+        // filters
+        private static Expression<Func<SavedFileDataDB, bool>> TagFilter(string tag) =>
+            f => f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == tag.ToLower());
+
+        private static Expression<Func<SavedFileDataDB, bool>> CategoryFilter(string category) =>
+            f => f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == category.ToLower());
+
+        private static Expression<Func<SavedFileDataDB, bool>> NameFilter(string name) =>
+            f => f.Name != null && f.Name.ToLower().Contains(name.ToLower());
+
+        private static Expression<Func<SavedFileDataDB, bool>> DescriptionFilter(string description) =>
+            f => f.Description != null && f.Description.ToLower().Contains(description.ToLower());
+
         public FileSearchService(IIdentifiableRepository<SavedFileDataDB> dataRepository)
         {
             _dataRepository = dataRepository ?? throw new ArgumentNullException(nameof(dataRepository), "Service: dataRepository cannot be null.");
         }
 
-        // Helper to always include FileReference
-        private IQueryable<SavedFileDataDB> GetAllWithFileReference()
+        public async Task<List<Guid>> GetFileGuidsByTagAsync(
+            string tag,
+            CancellationToken cancellationToken = default)
         {
-            return _dataRepository.GetAll().Include(f => f.FileReference).AsNoTracking();
+            return await _dataRepository.GetFilteredAsync(
+                f => f.Id,
+                q => q.Where(TagFilter(tag)),
+                cancellationToken
+            );
         }
 
-        public List<Guid> GetFileGuidsByTag(string tag)
+        public async Task<List<Guid>> GetFileGuidsByCategoryAsync(
+            string category,
+            CancellationToken cancellationToken = default)
         {
-            string loweredTag = tag.ToLower();
-            return _dataRepository.GetAllAsReadOnly()
-                .Where(f => f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == loweredTag))
-                .Select(f => f.Id)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                f => f.Id,
+                q => q.Where(CategoryFilter(category)),
+                cancellationToken
+            );
         }
 
-        public List<Guid> GetFileGuidsByCategory(string category)
+        public async Task<List<Guid>> GetFileGuidsByNameAsync(
+            string name,
+            CancellationToken cancellationToken = default)
         {
-            string loweredCategory = category.ToLower();
-            return _dataRepository.GetAllAsReadOnly()
-                .Where(f => f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == loweredCategory))
-                .Select(f => f.Id)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                f => f.Id,
+                q => q.Where(NameFilter(name)),
+                cancellationToken
+            );
         }
 
-        public List<Guid> GetFileGuidsByName(string name)
+        public async Task<List<Guid>> GetFileGuidsByDescriptionAsync(
+            string description,
+            CancellationToken cancellationToken = default)
         {
-            string loweredName = name.ToLower();
-            return _dataRepository.GetAllAsReadOnly()
-                .Where(f => f.Name != null && f.Name.ToLower().Contains(loweredName))
-                .Select(f => f.Id)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                f => f.Id,
+                q => q.Where(DescriptionFilter(description)),
+                cancellationToken
+            );
         }
 
-        public List<Guid> GetFileGuidsByDescription(string description)
+        public async Task<List<Guid>> GetFileGuidsByAllFieldsAsync(
+            string? tag,
+            string? category,
+            string? name,
+            string? description,
+            CancellationToken cancellationToken = default)
         {
-            string loweredDescription = description.ToLower();
-            return _dataRepository.GetAllAsReadOnly()
-                .Where(f => f.Description != null && f.Description.ToLower().Contains(loweredDescription))
-                .Select(f => f.Id)
-                .ToList();
-        }
-
-        public List<Guid> GetFileGuidsByAllFields(string? tag, string? category, string? name, string? description)
-        {
-            var query = _dataRepository.GetAllAsReadOnly();
-
-            if (!string.IsNullOrWhiteSpace(tag))
+            Func<IQueryable<SavedFileDataDB>, IQueryable<SavedFileDataDB>> queryShaper = q =>
             {
-                string loweredTag = tag.ToLower();
-                query = query.Where(f => f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == loweredTag));
-            }
-            if (!string.IsNullOrWhiteSpace(category))
-            {
-                string loweredCategory = category.ToLower();
-                query = query.Where(f => f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == loweredCategory));
-            }
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                string loweredName = name.ToLower();
-                query = query.Where(f => f.Name != null && f.Name.ToLower().Contains(loweredName));
-            }
-            if (!string.IsNullOrWhiteSpace(description))
-            {
-                string loweredDescription = description.ToLower();
-                query = query.Where(f => f.Description != null && f.Description.ToLower().Contains(loweredDescription));
-            }
-
-            return query.Select(f => f.Id).ToList();
+                if (!string.IsNullOrWhiteSpace(tag))
+                    q = q.Where(TagFilter(tag));
+                if (!string.IsNullOrWhiteSpace(category))
+                    q = q.Where(CategoryFilter(category));
+                if (!string.IsNullOrWhiteSpace(name))
+                    q = q.Where(NameFilter(name));
+                if (!string.IsNullOrWhiteSpace(description))
+                    q = q.Where(DescriptionFilter(description));
+                return q;
+            };
+            return await _dataRepository.GetFilteredAsync(
+                f => f.Id,
+                queryShaper,
+                cancellationToken
+            );
         }
 
-        public List<SearchFileDataDTO> GetFileDataByTag(string tag)
+        public async Task<List<SearchFileDataDTO>> GetFileDataByTagAsync(
+            string tag,
+            CancellationToken cancellationToken = default)
         {
-            string loweredTag = tag.ToLower();
-            return _dataRepository.GetAll().Include(f => f.FileReference).AsNoTracking()
-                .Where(f => f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == loweredTag))
-                .Select(MappingUtils.MapSearchFileDataDTO)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                SearchFileDataSelector,
+                q => q.Include(f => f.FileReference).Where(TagFilter(tag)),
+                cancellationToken
+            );
         }
 
-        public List<SearchFileDataDTO> GetFileDataByCategory(string category)
+        public async Task<List<SearchFileDataDTO>> GetFileDataByCategoryAsync(
+            string category,
+            CancellationToken cancellationToken = default)
         {
-            string loweredCategory = category.ToLower();
-            return _dataRepository.GetAll().Include(f => f.FileReference).AsNoTracking()
-                .Where(f => f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == loweredCategory))
-                .Select(MappingUtils.MapSearchFileDataDTO)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                SearchFileDataSelector,
+                q => q.Include(f => f.FileReference).Where(CategoryFilter(category)),
+                cancellationToken
+            );
         }
 
-        public List<SearchFileDataDTO> GetFileDataByName(string name)
+        public async Task<List<SearchFileDataDTO>> GetFileDataByNameAsync(
+            string name,
+            CancellationToken cancellationToken = default)
         {
-            string loweredName = name.ToLower();
-            return _dataRepository.GetAll().Include(f => f.FileReference).AsNoTracking()
-                .Where(f => f.Name != null && f.Name.ToLower().Contains(loweredName))
-                .Select(MappingUtils.MapSearchFileDataDTO)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                SearchFileDataSelector,
+                q => q.Include(f => f.FileReference).Where(NameFilter(name)),
+                cancellationToken
+            );
         }
 
-        public List<SearchFileDataDTO> GetFileDataByDescription(string description)
+        public async Task<List<SearchFileDataDTO>> GetFileDataByDescriptionAsync(
+            string description,
+            CancellationToken cancellationToken = default)
         {
-            string loweredDescription = description.ToLower();
-            return _dataRepository.GetAll().Include(f => f.FileReference).AsNoTracking()
-                .Where(f => f.Description != null && f.Description.ToLower().Contains(loweredDescription))
-                .Select(MappingUtils.MapSearchFileDataDTO)
-                .ToList();
+            return await _dataRepository.GetFilteredAsync(
+                SearchFileDataSelector,
+                q => q.Include(f => f.FileReference).Where(DescriptionFilter(description)),
+                cancellationToken
+            );
         }
 
-        public List<SearchFileDataDTO> GetFileDataByAllFields(string? tag, string? category, string? name, string? description)
+        public async Task<List<SearchFileDataDTO>> GetFileDataByAllFieldsAsync(
+            string? tag,
+            string? category,
+            string? name,
+            string? description,
+            CancellationToken cancellationToken = default)
         {
-            var query = _dataRepository.GetAll().Include(f => f.FileReference).AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(tag))
+            Func<IQueryable<SavedFileDataDB>, IQueryable<SavedFileDataDB>> queryShaper = q =>
             {
-                string loweredTag = tag.ToLower();
-                query = query.Where(f => f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == loweredTag));
-            }
-            if (!string.IsNullOrWhiteSpace(category))
-            {
-                string loweredCategory = category.ToLower();
-                query = query.Where(f => f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == loweredCategory));
-            }
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                string loweredName = name.ToLower();
-                query = query.Where(f => f.Name != null && f.Name.ToLower().Contains(loweredName));
-            }
-            if (!string.IsNullOrWhiteSpace(description))
-            {
-                string loweredDescription = description.ToLower();
-                query = query.Where(f => f.Description != null && f.Description.ToLower().Contains(loweredDescription));
-            }
-
-            return query.Select(MappingUtils.MapSearchFileDataDTO).ToList();
+                q = q.Include(f => f.FileReference);
+                if (!string.IsNullOrWhiteSpace(tag))
+                    q = q.Where(TagFilter(tag));
+                if (!string.IsNullOrWhiteSpace(category))
+                    q = q.Where(CategoryFilter(category));
+                if (!string.IsNullOrWhiteSpace(name))
+                    q = q.Where(NameFilter(name));
+                if (!string.IsNullOrWhiteSpace(description))
+                    q = q.Where(DescriptionFilter(description));
+                return q;
+            };
+            return await _dataRepository.GetFilteredAsync(
+                SearchFileDataSelector,
+                queryShaper,
+                cancellationToken
+            );
         }
     }
 }

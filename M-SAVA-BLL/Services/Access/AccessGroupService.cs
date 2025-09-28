@@ -28,14 +28,14 @@ namespace M_SAVA_BLL.Services.Access
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
         }
 
-        public async Task<List<AccessGroupDB>> GetUserAccessGroupsAsync(Guid userId)
+        public List<AccessGroupDB> GetUserAccessGroups(Guid userId)
         {
             // Load user with access groups included to ensure navigation is available
-            UserDB user = await _userRepository.GetByIdAsync(userId, u => u.AccessGroups);
+            UserDB user = _userRepository.GetById(userId, u => u.AccessGroups);
             return user.AccessGroups?.ToList() ?? new List<AccessGroupDB>();
         }
 
-        public async Task<Guid> CreateAccessGroupAsync(string name)
+        public Guid CreateAccessGroup(string name)
         {
             Guid userId = _userService.GetSessionUserId();
             UserDB user = _userRepository.GetByIdAsTracked(userId);
@@ -52,7 +52,7 @@ namespace M_SAVA_BLL.Services.Access
             };
 
             _accessGroupRepository.Insert(accessGroup);
-            await _accessGroupRepository.SaveChangesAsync();
+            _accessGroupRepository.SaveChanges();
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupCreated, $"Access group '{name}' created by user {user.Username}.", user.Id, accessGroup.Id);
 
             // Ensure the user's access groups collection is initialized and add the creating user to the new access group
@@ -60,7 +60,7 @@ namespace M_SAVA_BLL.Services.Access
             user.AccessGroups.Add(accessGroup);
 
             _userRepository.Update(user);
-            await _userRepository.SaveChangesAsync();
+            _userRepository.SaveChanges();
 
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupUserAdded, $"User {user.Username} added to access group '{name}'.", user.Id, accessGroup.Id);
             return accessGroup.Id;
@@ -69,8 +69,8 @@ namespace M_SAVA_BLL.Services.Access
         public async Task AddAccessGroupToUserAsync(Guid accessGroupId, Guid userId)
         {
             // Retrieve entities; repository throws if not found
-            AccessGroupDB accessGroup = await _accessGroupRepository.GetByIdAsync(accessGroupId);
-            UserDB user = await _userRepository.GetByIdAsync(userId, u => u.AccessGroups);
+            AccessGroupDB accessGroup = _accessGroupRepository.GetById(accessGroupId);
+            UserDB user = _userRepository.GetById(userId, u => u.AccessGroups);
 
             if (!IsSessionUserAdminOrOwnerOfAccessGroup(accessGroup))
             {

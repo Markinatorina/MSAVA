@@ -29,5 +29,14 @@ namespace M_SAVA_DAL.Repositories
 
         void ChangeTrackingState(object entity, EntityState state);
         void MarkPropertyAsModified<TProperty>(T entity, Expression<Func<T, TProperty>> propertyExpression);
+
+        Task<List<T>> GetFilteredAsync(
+            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
+            CancellationToken cancellationToken = default);
+
+        Task<List<TResult>> GetFilteredAsync<TResult>(
+            Expression<Func<T, TResult>> selector,
+            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
+            CancellationToken cancellationToken = default);
     }
 }

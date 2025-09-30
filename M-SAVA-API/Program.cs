@@ -5,7 +5,6 @@ using M_SAVA_BLL.Services;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_DAL.Contexts;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
 using M_SAVA_INF.Environment;
 using M_SAVA_INF.Managers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,6 +22,7 @@ using M_SAVA_BLL.Services.Fetch;
 using M_SAVA_BLL.Services.Persistence;
 using M_SAVA_BLL.Services.Retrieval;
 using M_SAVA_BLL.Services.Access;
+using M_SAVA_DAL.Repositories.Generic;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

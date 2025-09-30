@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using M_SAVA_DAL.Models;
 using M_SAVA_BLL.Utils;
-using M_SAVA_DAL.Repositories;
 using M_SAVA_INF.Environment;
 using System;
 using System.Linq;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
+using M_SAVA_DAL.Repositories.Generic;
 
 namespace M_SAVA_BLL.Services
 {
@@ -60,7 +60,7 @@ namespace M_SAVA_BLL.Services
                     CreatedAt = DateTime.UtcNow
                 };
                 _userRepo.Insert(adminUser);
-                _userRepo.SaveChanges();
+                _userRepo.SaveChangesAndDetach();
                 _serviceLogger.WriteLog(UserLogAction.AccountCreation, $"Admin user '{adminUsername}' created during seeding.", adminUser.Id, null);
             }
             return adminUser.Id;

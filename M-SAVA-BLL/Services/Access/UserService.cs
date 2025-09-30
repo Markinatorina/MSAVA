@@ -1,7 +1,6 @@
 ﻿using M_SAVA_Shared.Models;
 using M_SAVA_BLL.Utils;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
+using M_SAVA_DAL.Repositories.Generic;
 
 namespace M_SAVA_BLL.Services.Access
 {
@@ -72,7 +72,7 @@ namespace M_SAVA_BLL.Services.Access
         public void DeleteUser(Guid id)
         {
             _userRepository.DeleteById(id);
-            _userRepository.SaveChanges();
+            _userRepository.SaveChangesAndDetach();
             _serviceLogger.WriteLog(UserLogAction.AccountDeletion, $"User deleted: {id}", id, null);
         }
 

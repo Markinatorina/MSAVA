@@ -1,7 +1,7 @@
 ﻿using M_SAVA_BLL.Loggers;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
+using M_SAVA_DAL.Repositories.Generic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace M_SAVA_BLL.Services.Access
                 MaxUses = maxUses
             };
             _inviteCodeRepository.Insert(inviteCode);
-            await _inviteCodeRepository.SaveChangesAsync();
+            await _inviteCodeRepository.SaveChangesAndDetachAsync();
             _serviceLogger.WriteLog(InviteLogActions.InviteCodeCreated, $"Invite code created by user {user.Username}.", user.Id, inviteCode.Id);
             return inviteCode.Id;
         }

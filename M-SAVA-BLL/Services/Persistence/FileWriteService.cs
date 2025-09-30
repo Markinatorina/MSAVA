@@ -2,7 +2,6 @@
 using M_SAVA_BLL.Utils;
 using M_SAVA_Shared.Models;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
 using M_SAVA_DAL.Utils;
 using M_SAVA_INF.Managers;
 using M_SAVA_INF.Models;
@@ -13,6 +12,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using M_SAVA_DAL.Repositories.Generic;
 
 namespace M_SAVA_BLL.Services.Persistence
 {
@@ -94,7 +94,7 @@ namespace M_SAVA_BLL.Services.Persistence
             // Insert both entities and persist once (same DbContext handles all tracked changes)
             _savedRefsRepository.Insert(savedFileDb);
             _savedDataRepository.Insert(savedFileDataDb);
-            await _savedRefsRepository.SaveChangesAsync();
+            await _savedRefsRepository.SaveChangesAndDetachAsync();
 
             string fileName = MappingUtils.GetFileName(savedFileDb);
             string fileExtension = FileExtensionUtils.GetFileExtension(savedFileDb);
@@ -163,7 +163,7 @@ namespace M_SAVA_BLL.Services.Persistence
                 // Insert both entities and persist once
                 _savedRefsRepository.Insert(savedFileDb);
                 _savedDataRepository.Insert(savedFileDataDb);
-                await _savedRefsRepository.SaveChangesAsync();
+                await _savedRefsRepository.SaveChangesAndDetachAsync();
 
                 string fileName = MappingUtils.GetFileName(savedFileDb);
                 string fileExtension = FileExtensionUtils.GetFileExtension(savedFileDb);

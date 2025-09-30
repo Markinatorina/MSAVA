@@ -1,6 +1,5 @@
 ﻿using M_SAVA_Shared.Models;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -11,6 +10,7 @@ using System.Security.Cryptography;
 using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using M_SAVA_DAL.Repositories.Generic;
 
 namespace M_SAVA_API.Middleware
 {
@@ -63,7 +63,7 @@ namespace M_SAVA_API.Middleware
                 UserId = userId
             };
             errorLogRepository.Insert(errorLog);
-            errorLogRepository.SaveChanges();
+            errorLogRepository.SaveChangesAndDetach();
         }
 
         private static int GetStatusCode(Exception exception)

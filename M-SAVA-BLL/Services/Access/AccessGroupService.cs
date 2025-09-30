@@ -1,7 +1,7 @@
 ﻿using M_SAVA_BLL.Loggers;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
+using M_SAVA_DAL.Repositories.Generic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +52,7 @@ namespace M_SAVA_BLL.Services.Access
             };
 
             _accessGroupRepository.Insert(accessGroup);
-            _accessGroupRepository.SaveChanges();
+            _accessGroupRepository.SaveChangesAndDetach();
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupCreated, $"Access group '{name}' created by user {user.Username}.", user.Id, accessGroup.Id);
 
             // Ensure the user's access groups collection is initialized and add the creating user to the new access group
@@ -60,7 +60,7 @@ namespace M_SAVA_BLL.Services.Access
             user.AccessGroups.Add(accessGroup);
 
             _userRepository.Update(user);
-            _userRepository.SaveChanges();
+            _userRepository.SaveChangesAndDetach();
 
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupUserAdded, $"User {user.Username} added to access group '{name}'.", user.Id, accessGroup.Id);
             return accessGroup.Id;
@@ -86,7 +86,7 @@ namespace M_SAVA_BLL.Services.Access
             user.AccessGroups.Add(accessGroup);
 
             _userRepository.Update(user);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.SaveChangesAndDetachAsync();
 
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupUserAdded, $"User {user.Username} added to access group '{accessGroup.Name}'.", user.Id, accessGroup.Id);
         }

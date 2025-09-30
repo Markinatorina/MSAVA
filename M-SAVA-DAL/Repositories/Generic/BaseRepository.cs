@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace M_SAVA_DAL.Repositories
+namespace M_SAVA_DAL.Repositories.Generic
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
@@ -19,7 +19,7 @@ namespace M_SAVA_DAL.Repositories
             _entities = context.Set<T>();
         }
 
-        public void SaveChanges()
+        public void SaveChangesAndDetach()
         {
             if (_context.ChangeTracker.HasChanges())
             {
@@ -29,7 +29,7 @@ namespace M_SAVA_DAL.Repositories
             _context.ChangeTracker.Clear();
         }
 
-        public async Task SaveChangesAsync()
+        public async Task SaveChangesAndDetachAsync()
         {
             if (_context.ChangeTracker.HasChanges())
             {
@@ -39,7 +39,7 @@ namespace M_SAVA_DAL.Repositories
             _context.ChangeTracker.Clear();
         }
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T> GetAllAsTracked()
         {
             return _entities;
         }
@@ -47,26 +47,6 @@ namespace M_SAVA_DAL.Repositories
         public IQueryable<T> GetAllAsReadOnly()
         {
             return _entities.AsNoTracking();
-        }
-
-        public Task<List<T>> GetFilteredAsync(
-            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
-            CancellationToken cancellationToken = default)
-        {
-            IQueryable<T> q = _entities;
-            if (queryShaper != null) q = queryShaper(q);
-            return q.AsNoTracking().ToListAsync(cancellationToken);
-        }
-
-        public Task<List<TResult>> GetFilteredAsync<TResult>(
-            Expression<Func<T, TResult>> selector,
-            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
-            CancellationToken cancellationToken = default)
-        {
-            if (selector == null) throw new ArgumentNullException(nameof(selector));
-            IQueryable<T> q = _entities;
-            if (queryShaper != null) q = queryShaper(q);
-            return q.AsNoTracking().Select(selector).ToListAsync(cancellationToken);
         }
 
         public void Insert(T entity)

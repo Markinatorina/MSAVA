@@ -5,14 +5,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace M_SAVA_DAL.Repositories
+namespace M_SAVA_DAL.Repositories.Generic
 {
     public interface IBaseRepository<T> where T : class
     {
-        void SaveChanges();
-        Task SaveChangesAsync();
+        void SaveChangesAndDetach();
+        Task SaveChangesAndDetachAsync();
 
-        IQueryable<T> GetAll();
+        IQueryable<T> GetAllAsTracked();
         IQueryable<T> GetAllAsReadOnly();
 
         void Insert(T entity);
@@ -29,14 +29,5 @@ namespace M_SAVA_DAL.Repositories
 
         void ChangeTrackingState(object entity, EntityState state);
         void MarkPropertyAsModified<TProperty>(T entity, Expression<Func<T, TProperty>> propertyExpression);
-
-        Task<List<T>> GetFilteredAsync(
-            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
-            CancellationToken cancellationToken = default);
-
-        Task<List<TResult>> GetFilteredAsync<TResult>(
-            Expression<Func<T, TResult>> selector,
-            Func<IQueryable<T>, IQueryable<T>>? queryShaper = null,
-            CancellationToken cancellationToken = default);
     }
 }

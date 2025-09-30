@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using M_SAVA_Shared.Models;
 using M_SAVA_BLL.Utils;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using M_SAVA_INF.Managers;
@@ -19,6 +18,7 @@ using M_SAVA_INF.Models;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
 using M_SAVA_BLL.Services.Access;
+using M_SAVA_DAL.Repositories.Generic;
 
 namespace M_SAVA_BLL.Services.Retrieval
 {

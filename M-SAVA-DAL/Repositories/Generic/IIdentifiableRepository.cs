@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace M_SAVA_DAL.Repositories
+namespace M_SAVA_DAL.Repositories.Generic
 {
     public interface IIdentifiableRepository<T> : IBaseRepository<T> where T : class, IIdentifiableDB
     {

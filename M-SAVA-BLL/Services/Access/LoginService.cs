@@ -1,6 +1,5 @@
 ﻿using M_SAVA_Shared.Models;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -13,6 +12,7 @@ using M_SAVA_INF.Environment;
 using M_SAVA_BLL.Utils;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
+using M_SAVA_DAL.Repositories.Generic;
 
 namespace M_SAVA_BLL.Services.Access
 {
@@ -110,7 +110,7 @@ namespace M_SAVA_BLL.Services.Access
                 ExpiresAt = expiresAt
             };
             _jwtRepository.Insert(jwtDb);
-            await _jwtRepository.SaveChangesAsync();
+            await _jwtRepository.SaveChangesAndDetachAsync();
 
             return jwtDb;
         }
@@ -155,7 +155,7 @@ namespace M_SAVA_BLL.Services.Access
             };
 
             _userRepository.Insert(user);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository.SaveChangesAndDetachAsync();
 
             _serviceLogger.WriteLog(UserLogAction.AccountRegistered, $"User {user.Username} registered successfully.", user.Id, null);
 

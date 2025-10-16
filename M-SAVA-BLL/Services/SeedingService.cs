@@ -10,25 +10,23 @@ using System;
 using System.Linq;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services
 {
     public class SeedingService : ISeedingService
     {
-        private readonly IIdentifiableRepository<UserDB> _userRepo;
-        private readonly IIdentifiableRepository<InviteCodeDB> _inviteCodeRepo;
+        private readonly BaseDataContext _context;
         private readonly ILocalEnvironment _env;
         private readonly ServiceLogger _serviceLogger;
 
         public SeedingService(
-            IIdentifiableRepository<UserDB> userRepo,
-            IIdentifiableRepository<InviteCodeDB> inviteCodeRepo,
+            BaseDataContext context,
             ILocalEnvironment env,
             ServiceLogger serviceLogger)
         {
-            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
-            _inviteCodeRepo = inviteCodeRepo ?? throw new ArgumentNullException(nameof(inviteCodeRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _env = env ?? throw new ArgumentNullException(nameof(env));
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
         }
@@ -43,7 +41,7 @@ namespace M_SAVA_BLL.Services
             string adminUsername = _env.Values.AdminUsername;
             string adminPassword = _env.Values.AdminPassword;
 
-            UserDB? adminUser = _userRepo.GetAllAsReadOnly().FirstOrDefault(u => u.Username == adminUsername);
+            UserDB? adminUser = _context.Users.AsNoTracking().FirstOrDefault(u => u.Username == adminUsername);
             if (adminUser == null)
             {
                 byte[] salt = PasswordUtils.GenerateSalt();
@@ -59,8 +57,8 @@ namespace M_SAVA_BLL.Services
                     IsWhitelisted = true,
                     CreatedAt = DateTime.UtcNow
                 };
-                _userRepo.Insert(adminUser);
-                _userRepo.SaveChangesAndDetach();
+                _context.Users.Add(adminUser);
+                _context.SaveChanges();
                 _serviceLogger.WriteLog(UserLogAction.AccountCreation, $"Admin user '{adminUsername}' created during seeding.", adminUser.Id, null);
             }
             return adminUser.Id;

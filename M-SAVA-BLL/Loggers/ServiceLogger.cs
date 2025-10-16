@@ -1,36 +1,25 @@
 ﻿using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Loggers
 {
     public class ServiceLogger
     {
         private readonly ILogger<ServiceLogger> _logger;
-        private readonly IIdentifiableRepository<ErrorLogDB> _errorLogRepository;
-        private readonly IIdentifiableRepository<AccessLogDB> _accessLogRepository;
-        private readonly IIdentifiableRepository<UserLogDB> _userLogRepository;
-        private readonly IIdentifiableRepository<GroupLogDB> _groupLogRepository;
-        private readonly IIdentifiableRepository<InviteLogDB> _inviteLogRepository;
+        private readonly BaseDataContext _context;
         public ServiceLogger(
             ILogger<ServiceLogger> logger,
-            IIdentifiableRepository<ErrorLogDB> errorLogRepository,
-            IIdentifiableRepository<AccessLogDB> accessLogRepository,
-            IIdentifiableRepository<UserLogDB> userLogRepository,
-            IIdentifiableRepository<GroupLogDB> groupLogRepository,
-            IIdentifiableRepository<InviteLogDB> inviteLogRepository)
+            BaseDataContext context)
         {
             _logger = logger;
-            _errorLogRepository = errorLogRepository;
-            _accessLogRepository = accessLogRepository;
-            _userLogRepository = userLogRepository;
-            _groupLogRepository = groupLogRepository;
-            _inviteLogRepository = inviteLogRepository;
+            _context = context;
         }
 
         public void LogInformation(string message)
@@ -92,8 +81,8 @@ namespace M_SAVA_BLL.Loggers
             };
             string sanitizedMessage = SanitizeString(message);
             _logger.LogError("Status Code: {StatusCode}, Message: {Message}, UserId: {UserId}", statusCode, sanitizedMessage, userId);
-            _errorLogRepository.Insert(errorLog);
-            _errorLogRepository.SaveChangesAndDetach();
+            _context.ErrorLogs.Add(errorLog);
+            _context.SaveChanges();
         }
 
         public void WriteLog(InviteLogActions action, string message, Guid userId, Guid codeId)
@@ -110,8 +99,8 @@ namespace M_SAVA_BLL.Loggers
             string sanitizedMessage = SanitizeString(message);
             string actionString = action.ToString();
             _logger.LogInformation("Action: {Action}, Message: {Message}, UserId: {UserId}, InviteCodeId: {CodeId}", actionString, sanitizedMessage, userId, codeId);
-            _inviteLogRepository.Insert(inviteLog);
-            _inviteLogRepository.SaveChangesAndDetach();
+            _context.InviteLogs.Add(inviteLog);
+            _context.SaveChanges();
         }
 
         public void WriteLog(GroupLogActions action, string message, Guid userId, Guid groupId)
@@ -127,8 +116,8 @@ namespace M_SAVA_BLL.Loggers
             string sanitizedMessage = SanitizeString(message);
             string actionString = action.ToString();
             _logger.LogInformation("Action: {Action}, Message: {Message}, UserId: {UserId}, GroupId: {GroupId}", actionString, sanitizedMessage, userId, groupId);
-            _groupLogRepository.Insert(groupLog);
-            _groupLogRepository.SaveChangesAndDetach();
+            _context.GroupLogs.Add(groupLog);
+            _context.SaveChanges();
         }
 
         public void WriteLog(AccessLogActions action, string message, Guid userId, string fileNameWithExtension, Guid refId)
@@ -145,8 +134,8 @@ namespace M_SAVA_BLL.Loggers
             string sanitizedFileName = SanitizeString(fileNameWithExtension);
             string actionString = action.ToString();
             _logger.LogInformation("Action: {Action}, Message: {Message}, UserId: {UserId}, File: {fileNameWithExtension}, FileRefId: {refId}", actionString, sanitizedMessage, userId, sanitizedFileName, refId);
-            _accessLogRepository.Insert(accessLog);
-            _accessLogRepository.SaveChangesAndDetach();
+            _context.AccessLogs.Add(accessLog);
+            _context.SaveChanges();
         }
         public void WriteLog(AccessLogActions action, string message, Guid userId, Guid refId)
         {
@@ -161,8 +150,8 @@ namespace M_SAVA_BLL.Loggers
             string sanitizedMessage = SanitizeString(message);
             string actionString = action.ToString();
             _logger.LogInformation("Action: {Action}, Message: {Message}, UserId: {UserId}, FileRefId: {refId}", actionString, sanitizedMessage, userId, refId);
-            _accessLogRepository.Insert(accessLog);
-            _accessLogRepository.SaveChangesAndDetach();
+            _context.AccessLogs.Add(accessLog);
+            _context.SaveChanges();
         }
 
         public void WriteLog(UserLogAction action, string message, Guid userId, Guid? adminId)
@@ -177,9 +166,8 @@ namespace M_SAVA_BLL.Loggers
             string sanitizedMessage = SanitizeString(message);
             string actionString = action.ToString();
             _logger.LogInformation("Action: {Action}, Message: {Message}, UserId: {UserId}, AdminId: {AdminId}", actionString, sanitizedMessage, userId, adminId);
-
-            _userLogRepository.Insert(userLog);
-            _userLogRepository.SaveChangesAndDetach();
+            _context.UserLogs.Add(userLog);
+            _context.SaveChanges();
         }
     }
 }

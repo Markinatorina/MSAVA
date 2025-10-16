@@ -9,26 +9,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services.Access
 {
     public class UserService : IUserService
     {
-        private readonly IIdentifiableRepository<UserDB> _userRepository;
+        private readonly BaseDataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ServiceLogger _serviceLogger;
 
-        public UserService(IIdentifiableRepository<UserDB> userRepository, IHttpContextAccessor httpContextAccessor, ServiceLogger serviceLogger)
+        public UserService(BaseDataContext context, IHttpContextAccessor httpContextAccessor, ServiceLogger serviceLogger)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
         }
 
         public UserDTO GetUserById(Guid id)
         {
-            var userDb = _userRepository.GetById(id, u => u.AccessGroups);
+            var userDb = _context.Users
+                .AsNoTracking()
+                .Include(u => u.AccessGroups)
+                .SingleOrDefault(u => u.Id == id) 
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
             return MappingUtils.MapUserDTOWithRelationships(userDb);
         }
 
@@ -59,20 +64,26 @@ namespace M_SAVA_BLL.Services.Access
         {
             // Load the current session user with access groups included
             Guid sessionUserId = GetSessionUserId();
-            var userDb = _userRepository.GetById(sessionUserId, u => u.AccessGroups);
+            var userDb = _context.Users
+                .AsNoTracking()
+                .Include(u => u.AccessGroups)
+                .SingleOrDefault(u => u.Id == sessionUserId) 
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {sessionUserId} not found.");
             return userDb;
         }
 
         public List<UserDTO> GetAllUsers()
         {
-            var userDbs = _userRepository.GetAllAsReadOnly().ToList();
+            var userDbs = _context.Users.AsNoTracking().ToList();
             return userDbs.Select(MappingUtils.MapUserDTOWithRelationships).ToList();
         }
 
         public void DeleteUser(Guid id)
         {
-            _userRepository.DeleteById(id);
-            _userRepository.SaveChangesAndDetach();
+            var user = _context.Users.SingleOrDefault(u => u.Id == id) 
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
+            _context.Users.Remove(user);
+            _context.SaveChanges();
             _serviceLogger.WriteLog(UserLogAction.AccountDeletion, $"User deleted: {id}", id, null);
         }
 

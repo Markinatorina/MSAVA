@@ -1,44 +1,48 @@
 ﻿using M_SAVA_BLL.Loggers;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services.Access
 {
     public class AccessGroupService
     {
-        private readonly IIdentifiableRepository<AccessGroupDB> _accessGroupRepository;
-        private readonly IIdentifiableRepository<UserDB> _userRepository;
+        private readonly BaseDataContext _context;
         private readonly IUserService _userService;
         private readonly ServiceLogger _serviceLogger;
 
         public AccessGroupService(
-            IIdentifiableRepository<AccessGroupDB> accessGroupRepo,
+            BaseDataContext context,
             IUserService userService,
-            IIdentifiableRepository<UserDB> userRepository,
             ServiceLogger serviceLogger)
         {
-            _accessGroupRepository = accessGroupRepo ?? throw new ArgumentNullException(nameof(accessGroupRepo));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
         }
 
         public List<AccessGroupDB> GetUserAccessGroups(Guid userId)
         {
             // Load user with access groups included to ensure navigation is available
-            UserDB user = _userRepository.GetById(userId, u => u.AccessGroups);
+            var user = _context.Users
+                .AsNoTracking()
+                .Include(u => u.AccessGroups)
+                .SingleOrDefault(u => u.Id == userId);
+            if (user == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {userId} not found.");
             return user.AccessGroups?.ToList() ?? new List<AccessGroupDB>();
         }
 
         public Guid CreateAccessGroup(string name)
         {
             Guid userId = _userService.GetSessionUserId();
-            UserDB user = _userRepository.GetByIdAsTracked(userId);
+            var user = _context.Users.SingleOrDefault(u => u.Id == userId) 
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {userId} not found.");
             DateTime now = DateTime.UtcNow;
 
             AccessGroupDB accessGroup = new AccessGroupDB
@@ -51,16 +55,16 @@ namespace M_SAVA_BLL.Services.Access
                 SubGroups = new List<AccessGroupDB>()
             };
 
-            _accessGroupRepository.Insert(accessGroup);
-            _accessGroupRepository.SaveChangesAndDetach();
+            _context.AccessGroups.Add(accessGroup);
+            _context.SaveChanges();
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupCreated, $"Access group '{name}' created by user {user.Username}.", user.Id, accessGroup.Id);
 
             // Ensure the user's access groups collection is initialized and add the creating user to the new access group
             user.AccessGroups ??= new List<AccessGroupDB>();
             user.AccessGroups.Add(accessGroup);
 
-            _userRepository.Update(user);
-            _userRepository.SaveChangesAndDetach();
+            _context.Users.Update(user);
+            _context.SaveChanges();
 
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupUserAdded, $"User {user.Username} added to access group '{name}'.", user.Id, accessGroup.Id);
             return accessGroup.Id;
@@ -68,9 +72,17 @@ namespace M_SAVA_BLL.Services.Access
 
         public async Task AddAccessGroupToUserAsync(Guid accessGroupId, Guid userId)
         {
-            // Retrieve entities; repository throws if not found
-            AccessGroupDB accessGroup = _accessGroupRepository.GetById(accessGroupId);
-            UserDB user = _userRepository.GetById(userId, u => u.AccessGroups);
+            // Retrieve entities; throw if not found
+            var accessGroup = await _context.AccessGroups
+                .SingleOrDefaultAsync(g => g.Id == accessGroupId);
+            if (accessGroup == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {accessGroupId} not found.");
+
+            var user = await _context.Users
+                .Include(u => u.AccessGroups)
+                .SingleOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                throw new KeyNotFoundException($"Repository: Entity with id {userId} not found.");
 
             if (!IsSessionUserAdminOrOwnerOfAccessGroup(accessGroup))
             {
@@ -85,8 +97,8 @@ namespace M_SAVA_BLL.Services.Access
 
             user.AccessGroups.Add(accessGroup);
 
-            _userRepository.Update(user);
-            await _userRepository.SaveChangesAndDetachAsync();
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
 
             _serviceLogger.WriteLog(GroupLogActions.AccessGroupUserAdded, $"User {user.Username} added to access group '{accessGroup.Name}'.", user.Id, accessGroup.Id);
         }

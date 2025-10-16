@@ -18,23 +18,24 @@ using M_SAVA_INF.Models;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
 using M_SAVA_BLL.Services.Access;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services.Retrieval
 {
     public class FileReturnService : IReturnFileService
     {
-        private readonly IIdentifiableRepository<SavedFileReferenceDB> _savedFileRepository;
+        private readonly BaseDataContext _context;
         private readonly FileManager _fileManager;
         private readonly IUserService _userService;
         private readonly ServiceLogger _serviceLogger;
 
-        public FileReturnService(IIdentifiableRepository<SavedFileReferenceDB> savedFileRepository,
+        public FileReturnService(BaseDataContext context,
             IUserService userService,
             FileManager fileManager,
             ServiceLogger serviceLogger)
         {
-            _savedFileRepository = savedFileRepository ?? throw new ArgumentNullException(nameof(savedFileRepository));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
@@ -42,7 +43,8 @@ namespace M_SAVA_BLL.Services.Retrieval
 
         public StreamReturnFileDTO GetFileStreamById(Guid id)
         {
-            SavedFileReferenceDB db = _savedFileRepository.GetById(id);
+            var db = _context.FileRefs.AsNoTracking().SingleOrDefault(r => r.Id == id)
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
             CanSessionUserAccessFile(db);
 
             FileStream fileStream = _fileManager.GetFileStream(db.FileHash, db.FileExtension.ToString());
@@ -57,7 +59,8 @@ namespace M_SAVA_BLL.Services.Retrieval
 
         public PhysicalReturnFileDTO GetPhysicalFileReturnDataById(Guid id)
         {
-            SavedFileReferenceDB db = _savedFileRepository.GetById(id);
+            var db = _context.FileRefs.AsNoTracking().SingleOrDefault(r => r.Id == id)
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {id} not found.");
             CanSessionUserAccessFile(db);
 
             string fileName = MappingUtils.GetFileName(db);

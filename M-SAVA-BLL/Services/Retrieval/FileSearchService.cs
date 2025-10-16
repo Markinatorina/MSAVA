@@ -1,23 +1,24 @@
 using M_SAVA_Shared.Models;
 using M_SAVA_BLL.Utils;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories;
+using M_SAVA_DAL.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using M_SAVA_BLL.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services.Retrieval
 {
     public class FileSearchService : ISearchFileService
     {
-        private readonly FileSearchRepository _fileSearchRepository;
+        private readonly BaseDataContext _context;
 
-        public FileSearchService(FileSearchRepository fileSearchRepository)
+        public FileSearchService(BaseDataContext context)
         {
-            _fileSearchRepository = fileSearchRepository ?? throw new ArgumentNullException(nameof(fileSearchRepository));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         private static SearchFileDataDTO MapToDTO(SavedFileDataDB db)
@@ -32,13 +33,16 @@ namespace M_SAVA_BLL.Services.Retrieval
             string? description,
             CancellationToken cancellationToken = default)
         {
-            return await _fileSearchRepository.SearchFileIdsAsync(
-                tag,
-                category,
-                name,
-                description,
-                cancellationToken
-            );
+            var query = _context.FileData
+                .AsNoTracking()
+                .Where(f =>
+                    (string.IsNullOrWhiteSpace(tag) || (f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == tag.ToLower()))) &&
+                    (string.IsNullOrWhiteSpace(category) || (f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == category.ToLower()))) &&
+                    (string.IsNullOrWhiteSpace(name) || (f.Name != null && f.Name.ToLower().Contains(name.ToLower()))) &&
+                    (string.IsNullOrWhiteSpace(description) || (f.Description != null && f.Description.ToLower().Contains(description.ToLower())))
+                );
+
+            return await query.Select(f => f.Id).ToListAsync(cancellationToken);
         }
 
         public async Task<List<SearchFileDataDTO>> GetFileDataByAllFieldsAsync(
@@ -48,13 +52,17 @@ namespace M_SAVA_BLL.Services.Retrieval
             string? description,
             CancellationToken cancellationToken = default)
         {
-            var dbList = await _fileSearchRepository.SearchFilesAsync(
-                tag,
-                category,
-                name,
-                description,
-                cancellationToken
-            );
+            var query = _context.FileData
+                .AsNoTracking()
+                .Include(f => f.FileReference)
+                .Where(f =>
+                    (string.IsNullOrWhiteSpace(tag) || (f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == tag.ToLower()))) &&
+                    (string.IsNullOrWhiteSpace(category) || (f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == category.ToLower()))) &&
+                    (string.IsNullOrWhiteSpace(name) || (f.Name != null && f.Name.ToLower().Contains(name.ToLower()))) &&
+                    (string.IsNullOrWhiteSpace(description) || (f.Description != null && f.Description.ToLower().Contains(description.ToLower())))
+                );
+
+            var dbList = await query.ToListAsync(cancellationToken);
             return dbList.Select(MapToDTO).ToList();
         }
     }

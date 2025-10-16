@@ -1,30 +1,28 @@
 ﻿using M_SAVA_BLL.Loggers;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services.Access
 {
     public class InviteCodeService
     {
-        private readonly IIdentifiableRepository<InviteCodeDB> _inviteCodeRepository;
-        private readonly IIdentifiableRepository<UserDB> _userRepository;
+        private readonly BaseDataContext _context;
         private readonly IUserService _userService;
         private readonly ServiceLogger _serviceLogger;
 
         public InviteCodeService(
-            IIdentifiableRepository<InviteCodeDB> inviteCodeRepo,
-            IIdentifiableRepository<UserDB> userRepository,
+            BaseDataContext context,
             IUserService userService,
             ServiceLogger serviceLogger)
         {
-            _inviteCodeRepository = inviteCodeRepo ?? throw new ArgumentNullException(nameof(inviteCodeRepo));
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger));
         }
@@ -40,22 +38,23 @@ namespace M_SAVA_BLL.Services.Access
                 ExpiresAt = expiresAt,
                 MaxUses = maxUses
             };
-            _inviteCodeRepository.Insert(inviteCode);
-            await _inviteCodeRepository.SaveChangesAndDetachAsync();
+            _context.InviteCodes.Add(inviteCode);
+            await _context.SaveChangesAsync();
             _serviceLogger.WriteLog(InviteLogActions.InviteCodeCreated, $"Invite code created by user {user.Username}.", user.Id, inviteCode.Id);
             return inviteCode.Id;
         }
 
         public int GetHowManyUses(Guid inviteCode)
         {
-            int usedCount = _userRepository.GetAllAsReadOnly().Count(u => u.InviteCodeId == inviteCode);
+            int usedCount = _context.Users.AsNoTracking().Count(u => u.InviteCodeId == inviteCode);
             return usedCount;
         }
 
         public int GetRemainingUses(Guid inviteCode)
         {
             int usedCount = GetHowManyUses(inviteCode);
-            InviteCodeDB inviteCodeDB = _inviteCodeRepository.GetById(inviteCode);
+            InviteCodeDB? inviteCodeDB = _context.InviteCodes.AsNoTracking().SingleOrDefault(ic => ic.Id == inviteCode);
+            if (inviteCodeDB == null) throw new KeyNotFoundException($"Repository: Entity with id {inviteCode} not found.");
             return inviteCodeDB.MaxUses - usedCount;
         }
 
@@ -67,12 +66,13 @@ namespace M_SAVA_BLL.Services.Access
 
         public List<InviteCodeDB> GetAllInviteCodes()
         {
-            return _inviteCodeRepository.GetAllAsReadOnly().ToList();
+            return _context.InviteCodes.AsNoTracking().ToList();
         }
 
         public InviteCodeDB GetInviteCodeById(Guid inviteCodeId)
         {
-            return _inviteCodeRepository.GetById(inviteCodeId);
+            return _context.InviteCodes.AsNoTracking().SingleOrDefault(i => i.Id == inviteCodeId)
+                ?? throw new KeyNotFoundException($"Repository: Entity with id {inviteCodeId} not found.");
         }
     }
 }

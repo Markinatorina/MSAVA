@@ -22,7 +22,6 @@ using M_SAVA_BLL.Services.Fetch;
 using M_SAVA_BLL.Services.Persistence;
 using M_SAVA_BLL.Services.Retrieval;
 using M_SAVA_BLL.Services.Access;
-using M_SAVA_DAL.Repositories.Generic;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -129,21 +128,6 @@ builder.Services.AddScoped<ServiceLogger>();
 
 // Register singletons
 builder.Services.AddSingleton<IAuthorizationHandler, NotBannedHandler>();
-
-// Register repositories
-builder.Services.AddScoped<IIdentifiableRepository<UserDB>, IdentifiableRepository<UserDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<InviteCodeDB>, IdentifiableRepository<InviteCodeDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<AccessCodeDB>, IdentifiableRepository<AccessCodeDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<AccessGroupDB>, IdentifiableRepository<AccessGroupDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<JwtDB>, IdentifiableRepository<JwtDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<SavedFileDataDB>, IdentifiableRepository<SavedFileDataDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<SavedFileReferenceDB>, IdentifiableRepository<SavedFileReferenceDB>>();
-// Log repositories
-builder.Services.AddScoped<IIdentifiableRepository<UserLogDB>, IdentifiableRepository<UserLogDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<AccessLogDB>, IdentifiableRepository<AccessLogDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<ErrorLogDB>, IdentifiableRepository<ErrorLogDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<GroupLogDB>, IdentifiableRepository<GroupLogDB>>();
-builder.Services.AddScoped<IIdentifiableRepository<InviteLogDB>, IdentifiableRepository<InviteLogDB>>();
 
 // Register managers
 builder.Services.AddScoped<FileManager>();

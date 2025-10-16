@@ -12,27 +12,25 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace M_SAVA_BLL.Services.Persistence
 {
     public class FileWriteService
     {
-        private readonly IIdentifiableRepository<SavedFileReferenceDB> _savedRefsRepository;
-        private readonly IIdentifiableRepository<SavedFileDataDB> _savedDataRepository;
+        private readonly BaseDataContext _context;
         private readonly FileManager _fileManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ServiceLogger _serviceLogger;
 
         public FileWriteService(
-            IIdentifiableRepository<SavedFileReferenceDB> savedFileRepository,
-            IIdentifiableRepository<SavedFileDataDB> savedDataRepository,
+            BaseDataContext context,
             FileManager fileManager,
             IHttpContextAccessor httpContextAccessor,
             ServiceLogger serviceLogger)
         {
-            _savedRefsRepository = savedFileRepository ?? throw new ArgumentNullException(nameof(savedFileRepository), "Service: savedFileRepository cannot be null.");
-            _savedDataRepository = savedDataRepository ?? throw new ArgumentNullException(nameof(savedDataRepository), "Service: savedDataRepository cannot be null.");
+            _context = context ?? throw new ArgumentNullException(nameof(context), "Service: dbContext cannot be null.");
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager), "Service: fileManager cannot be null.");
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor), "Service: httpContextAccessor cannot be null.");
             _serviceLogger = serviceLogger ?? throw new ArgumentNullException(nameof(serviceLogger), "Service: serviceLogger cannot be null.");
@@ -91,10 +89,10 @@ namespace M_SAVA_BLL.Services.Persistence
                 sessionUserId
             );
 
-            // Insert both entities and persist once (same DbContext handles all tracked changes)
-            _savedRefsRepository.Insert(savedFileDb);
-            _savedDataRepository.Insert(savedFileDataDb);
-            await _savedRefsRepository.SaveChangesAndDetachAsync();
+            // Insert both entities and persist once
+            _context.FileRefs.Add(savedFileDb);
+            _context.FileData.Add(savedFileDataDb);
+            await _context.SaveChangesAsync(cancellationToken);
 
             string fileName = MappingUtils.GetFileName(savedFileDb);
             string fileExtension = FileExtensionUtils.GetFileExtension(savedFileDb);
@@ -161,9 +159,9 @@ namespace M_SAVA_BLL.Services.Persistence
                 );
 
                 // Insert both entities and persist once
-                _savedRefsRepository.Insert(savedFileDb);
-                _savedDataRepository.Insert(savedFileDataDb);
-                await _savedRefsRepository.SaveChangesAndDetachAsync();
+                _context.FileRefs.Add(savedFileDb);
+                _context.FileData.Add(savedFileDataDb);
+                await _context.SaveChangesAsync(cancellationToken);
 
                 string fileName = MappingUtils.GetFileName(savedFileDb);
                 string fileExtension = FileExtensionUtils.GetFileExtension(savedFileDb);

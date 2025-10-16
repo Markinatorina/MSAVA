@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
 
 namespace M_SAVA_API.Middleware
 {
@@ -27,7 +27,7 @@ namespace M_SAVA_API.Middleware
         {
             var env = context.RequestServices.GetRequiredService<IHostEnvironment>();
             var logger = context.RequestServices.GetRequiredService<ILogger<ExceptionCatcherMiddleware>>();
-            var errorLogRepository = context.RequestServices.GetRequiredService<IIdentifiableRepository<ErrorLogDB>>();
+            var dbContext = context.RequestServices.GetRequiredService<BaseDataContext>();
             try
             {
                 await _next(context);
@@ -38,12 +38,12 @@ namespace M_SAVA_API.Middleware
                 DateTime timestamp = DateTime.UtcNow;
                 int statusCode = GetStatusCode(ex);
                 logger.LogError(ex, "Unhandled exception occurred: " + errorId);
-                LogErrorToDb(errorId, timestamp, context, ex, errorLogRepository, statusCode);
+                LogErrorToDb(errorId, timestamp, context, ex, dbContext, statusCode);
                 await HandleExceptionAsync(errorId, timestamp, context, ex, env.IsDevelopment(), statusCode);
             }
         }
 
-        private void LogErrorToDb(Guid errorId, DateTime timestamp, HttpContext context, Exception exception, IIdentifiableRepository<ErrorLogDB> errorLogRepository, int statusCode)
+        private void LogErrorToDb(Guid errorId, DateTime timestamp, HttpContext context, Exception exception, BaseDataContext dbContext, int statusCode)
         {
             Guid? userId = null;
             if (context.User?.Identity?.IsAuthenticated == true)
@@ -62,8 +62,8 @@ namespace M_SAVA_API.Middleware
                 Timestamp = timestamp,
                 UserId = userId
             };
-            errorLogRepository.Insert(errorLog);
-            errorLogRepository.SaveChangesAndDetach();
+            dbContext.ErrorLogs.Add(errorLog);
+            dbContext.SaveChanges();
         }
 
         private static int GetStatusCode(Exception exception)

@@ -12,14 +12,13 @@ using M_SAVA_INF.Environment;
 using M_SAVA_BLL.Utils;
 using M_SAVA_BLL.Services.Interfaces;
 using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Repositories.Generic;
+using M_SAVA_DAL.Contexts;
 
 namespace M_SAVA_BLL.Services.Access
 {
     public class LoginService : ILoginService
     {
-        private readonly IIdentifiableRepository<UserDB> _userRepository;
-        private readonly IIdentifiableRepository<JwtDB> _jwtRepository;
+        private readonly BaseDataContext _context;
         private readonly InviteCodeService _inviteCodeService;
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
@@ -27,14 +26,12 @@ namespace M_SAVA_BLL.Services.Access
         private readonly ServiceLogger _serviceLogger;
 
         public LoginService(
-            IIdentifiableRepository<UserDB> userRepository,
-            IIdentifiableRepository<JwtDB> jwtRepository,
+            BaseDataContext context,
             InviteCodeService inviteCodeService,
             ILocalEnvironment env,
             ServiceLogger serviceLogger)
         {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _jwtRepository = jwtRepository ?? throw new ArgumentNullException(nameof(jwtRepository));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _jwtIssuer = env.Values.JwtIssuerName;
             _jwtAudience = env.Values.JwtIssuerAudience;
             _jwtKeyBytes = env.GetSigningKeyBytes();
@@ -46,7 +43,8 @@ namespace M_SAVA_BLL.Services.Access
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             // Load user and their access groups for claims
-            UserDB? user = await _userRepository.GetAllAsReadOnly()
+            UserDB? user = await _context.Users
+                .AsNoTracking()
                 .Include(u => u.AccessGroups)
                 .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken);
             if (user == null || !PasswordUtils.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt))
@@ -109,8 +107,8 @@ namespace M_SAVA_BLL.Services.Access
                 IssuedAt = issuedAt,
                 ExpiresAt = expiresAt
             };
-            _jwtRepository.Insert(jwtDb);
-            await _jwtRepository.SaveChangesAndDetachAsync();
+            _context.Jwts.Add(jwtDb);
+            await _context.SaveChangesAsync();
 
             return jwtDb;
         }
@@ -132,7 +130,8 @@ namespace M_SAVA_BLL.Services.Access
                 throw new InvalidOperationException("Invalid or expired invite code.");
             }
 
-            bool exists = await _userRepository.GetAllAsReadOnly()
+            bool exists = await _context.Users
+                .AsNoTracking()
                 .AnyAsync(u => u.Username == request.Username, cancellationToken);
             if (exists)
             {
@@ -154,8 +153,8 @@ namespace M_SAVA_BLL.Services.Access
                 InviteCodeId = request.InviteCode,
             };
 
-            _userRepository.Insert(user);
-            await _userRepository.SaveChangesAndDetachAsync();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             _serviceLogger.WriteLog(UserLogAction.AccountRegistered, $"User {user.Username} registered successfully.", user.Id, null);
 

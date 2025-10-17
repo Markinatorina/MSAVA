@@ -35,9 +35,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\M-SAVA-DAL\M-SAVA-DAL.csproj" />
-		<ProjectReference Include="..\M-SAVA-BLL\M-SAVA-BLL.csproj" />
-		<ProjectReference Include="..\M-SAVA-INF\M-SAVA-INF.csproj" />
+		<ProjectReference Include="..\MSAVA-DAL\MSAVA-DAL.csproj" />
+		<ProjectReference Include="..\MSAVA-BLL\MSAVA-BLL.csproj" />
+		<ProjectReference Include="..\MSAVA-INF\MSAVA-INF.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

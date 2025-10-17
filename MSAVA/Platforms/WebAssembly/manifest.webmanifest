@@ -1,0 +1,10 @@
+{
+  "background_color": "#ffffff",
+  "description": "MSAVA",
+  "display": "standalone",
+  "name": "MSAVA",
+  "short_name": "MSAVA",
+  "start_url": "/index.html",
+  "theme_color": "#ffffff",
+  "scope": "/"
+}

@@ -21,8 +21,8 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\M-SAVA-Shared\M-SAVA-Shared.csproj" />
-		<ProjectReference Include="..\M-SAVA-DAL\M-SAVA-DAL.csproj" />
-		<ProjectReference Include="..\M-SAVA-INF\M-SAVA-INF.csproj" />
+		<ProjectReference Include="..\MSAVA-Shared\MSAVA-Shared.csproj" />
+		<ProjectReference Include="..\MSAVA-DAL\MSAVA-DAL.csproj" />
+		<ProjectReference Include="..\MSAVA-INF\MSAVA-INF.csproj" />
 	</ItemGroup>
 </Project>

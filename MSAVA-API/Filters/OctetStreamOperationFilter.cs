@@ -1,9 +1,9 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace M_SAVA_API.Filters
+namespace MSAVA_API.Filters
 {
     public class OctetStreamOperationFilter : IOperationFilter
     {

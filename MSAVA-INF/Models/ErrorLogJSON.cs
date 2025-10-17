@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace M_SAVA_INF.Models
+namespace MSAVA_INF.Models
 {
     public class ErrorLogJSON
     {

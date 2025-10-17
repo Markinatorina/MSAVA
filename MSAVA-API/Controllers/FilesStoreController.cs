@@ -1,18 +1,18 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using M_SAVA_Shared.Models;
-using M_SAVA_BLL.Utils;
-using M_SAVA_DAL.Models;
+using MSAVA_Shared.Models;
+using MSAVA_BLL.Utils;
+using MSAVA_DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace M_SAVA_API.Controllers
+namespace MSAVA_API.Controllers
 {
     [Route("api/files/store")]
     [ApiController]

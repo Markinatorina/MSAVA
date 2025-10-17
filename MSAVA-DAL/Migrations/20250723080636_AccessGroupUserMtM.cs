@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace M_SAVA_DAL.Migrations
+namespace MSAVA_DAL.Migrations
 {
     /// <inheritdoc />
     public partial class AccessGroupUserMtM : Migration

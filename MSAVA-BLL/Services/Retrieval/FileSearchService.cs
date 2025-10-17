@@ -1,16 +1,16 @@
-using M_SAVA_Shared.Models;
-using M_SAVA_BLL.Utils;
-using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Contexts;
+using MSAVA_Shared.Models;
+using MSAVA_BLL.Utils;
+using MSAVA_DAL.Models;
+using MSAVA_DAL.Contexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace M_SAVA_BLL.Services.Retrieval
+namespace MSAVA_BLL.Services.Retrieval
 {
     public class FileSearchService : ISearchFileService
     {

@@ -1,4 +1,4 @@
-﻿using M_SAVA_Shared.Models;
+using MSAVA_Shared.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace M_SAVA_API.Middleware
+namespace MSAVA_API.Middleware
 {
     public class RequestContextMiddleware
     {

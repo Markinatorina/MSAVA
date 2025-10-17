@@ -1,6 +1,6 @@
-﻿using M_SAVA_BLL.Loggers;
-using M_SAVA_BLL.Services.Persistence;
-using M_SAVA_Shared.Models;
+using MSAVA_BLL.Loggers;
+using MSAVA_BLL.Services.Persistence;
+using MSAVA_Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +15,7 @@ using YoutubeExplode;
 using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
-namespace M_SAVA_BLL.Services.Fetch
+namespace MSAVA_BLL.Services.Fetch
 {
     public class FetchYouTubeFileService
     {

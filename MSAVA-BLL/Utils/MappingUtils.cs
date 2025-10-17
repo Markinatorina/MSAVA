@@ -1,7 +1,7 @@
-﻿using M_SAVA_Shared.Models;
-using M_SAVA_DAL.Models;
-using M_SAVA_DAL.Utils;
-using M_SAVA_INF.Models;
+using MSAVA_Shared.Models;
+using MSAVA_DAL.Models;
+using MSAVA_DAL.Utils;
+using MSAVA_INF.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 
-namespace M_SAVA_BLL.Utils
+namespace MSAVA_BLL.Utils
 {
     public static class MappingUtils
     {

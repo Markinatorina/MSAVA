@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace M_SAVA_Shared.Models
+namespace MSAVA_Shared.Models
 {
     public class SaveFileFromFetchDTO
     {

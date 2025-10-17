@@ -1,12 +1,12 @@
-﻿using M_SAVA_API.Filters;
-using M_SAVA_API.Handlers;
-using M_SAVA_API.Middleware;
-using M_SAVA_BLL.Services;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_DAL.Contexts;
-using M_SAVA_DAL.Models;
-using M_SAVA_INF.Environment;
-using M_SAVA_INF.Managers;
+using MSAVA_API.Filters;
+using MSAVA_API.Handlers;
+using MSAVA_API.Middleware;
+using MSAVA_BLL.Services;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_DAL.Contexts;
+using MSAVA_DAL.Models;
+using MSAVA_INF.Environment;
+using MSAVA_INF.Managers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +17,11 @@ using System.Text;
 using System.Text.Json;
 using Serilog;
 using Serilog.Events;
-using M_SAVA_BLL.Loggers;
-using M_SAVA_BLL.Services.Fetch;
-using M_SAVA_BLL.Services.Persistence;
-using M_SAVA_BLL.Services.Retrieval;
-using M_SAVA_BLL.Services.Access;
+using MSAVA_BLL.Loggers;
+using MSAVA_BLL.Services.Fetch;
+using MSAVA_BLL.Services.Persistence;
+using MSAVA_BLL.Services.Retrieval;
+using MSAVA_BLL.Services.Access;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

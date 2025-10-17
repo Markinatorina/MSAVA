@@ -1,10 +1,10 @@
-﻿using M_SAVA_Shared.Models;
+using MSAVA_Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace M_SAVA_BLL.Services.Interfaces
+namespace MSAVA_BLL.Services.Interfaces
 {
     public interface ISearchFileService
     {

@@ -1,5 +1,5 @@
-﻿using M_SAVA_Shared.Models;
-using M_SAVA_DAL.Models;
+using MSAVA_Shared.Models;
+using MSAVA_DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -10,9 +10,9 @@ using System.Security.Cryptography;
 using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
-using M_SAVA_DAL.Contexts;
+using MSAVA_DAL.Contexts;
 
-namespace M_SAVA_API.Middleware
+namespace MSAVA_API.Middleware
 {
     public class ExceptionCatcherMiddleware
     {

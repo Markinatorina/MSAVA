@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace M_SAVA_BLL.Utils
+namespace MSAVA_BLL.Utils
 {
     public static class PasswordUtils
     {

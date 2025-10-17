@@ -1,5 +1,5 @@
-﻿using M_SAVA_INF.Models;
-using M_SAVA_INF.Utils;
+using MSAVA_INF.Models;
+using MSAVA_INF.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace M_SAVA_INF.Managers
+namespace MSAVA_INF.Managers
 {
     public class FileManager
     {

@@ -1,27 +1,27 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_Shared.Models;
-using M_SAVA_BLL.Utils;
-using M_SAVA_DAL.Models;
+using MSAVA_Shared.Models;
+using MSAVA_BLL.Utils;
+using MSAVA_DAL.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
-using M_SAVA_INF.Managers;
-using M_SAVA_INF.Utils;
-using M_SAVA_DAL.Utils;
+using MSAVA_INF.Managers;
+using MSAVA_INF.Utils;
+using MSAVA_DAL.Utils;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
-using M_SAVA_INF.Models;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_BLL.Loggers;
-using M_SAVA_BLL.Services.Access;
-using M_SAVA_DAL.Contexts;
+using MSAVA_INF.Models;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Loggers;
+using MSAVA_BLL.Services.Access;
+using MSAVA_DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace M_SAVA_BLL.Services.Retrieval
+namespace MSAVA_BLL.Services.Retrieval
 {
     public class FileReturnService : IReturnFileService
     {

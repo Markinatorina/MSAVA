@@ -1,5 +1,5 @@
-﻿using M_SAVA_BLL.Services.Access;
-using M_SAVA_DAL.Models;
+using MSAVA_BLL.Services.Access;
+using MSAVA_DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +7,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
-namespace M_SAVA_API.Controllers
+namespace MSAVA_API.Controllers
 {
     [Route("api/accessgroups")]
     [ApiController]

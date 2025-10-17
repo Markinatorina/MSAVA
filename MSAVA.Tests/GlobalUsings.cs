@@ -1,3 +1,3 @@
 global using FluentAssertions;
-global using MSAVA.Models;
+global using MSAVA_App.Models;
 global using NUnit.Framework;

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Security.Claims;
 
-namespace M_SAVA_BLL.Utils
+namespace MSAVA_BLL.Utils
 {
     public static class AuthUtils
     {

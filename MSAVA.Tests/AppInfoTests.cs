@@ -1,4 +1,4 @@
-namespace MSAVA.Tests;
+namespace MSAVA_App.Tests;
 
 public class AppInfoTests
 {

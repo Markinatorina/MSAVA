@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace M_SAVA_DAL.Migrations
+namespace MSAVA_DAL.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration

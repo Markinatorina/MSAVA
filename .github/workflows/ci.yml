@@ -31,9 +31,13 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.3.1
 
-      - name: Build MSAVA (Debug)
+      - name: Build MSAVA App (Debug)
         shell: pwsh
-        run: msbuild ./MSAVA/MSAVA.csproj /r
+        run: msbuild ./MSAVA-App/MSAVA-App.csproj /r
+        
+      - name: Build MSAVA API (Debug)
+        shell: pwsh
+        run: msbuild ./MSAVA-API/MSAVA-API.csproj /r
 
   unit_test:
     name: Unit Tests

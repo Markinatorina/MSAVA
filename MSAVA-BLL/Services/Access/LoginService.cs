@@ -1,5 +1,5 @@
-﻿using M_SAVA_Shared.Models;
-using M_SAVA_DAL.Models;
+using MSAVA_Shared.Models;
+using MSAVA_DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -8,13 +8,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_INF.Environment;
-using M_SAVA_BLL.Utils;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Contexts;
+using MSAVA_INF.Environment;
+using MSAVA_BLL.Utils;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Loggers;
+using MSAVA_DAL.Contexts;
 
-namespace M_SAVA_BLL.Services.Access
+namespace MSAVA_BLL.Services.Access
 {
     public class LoginService : ILoginService
     {

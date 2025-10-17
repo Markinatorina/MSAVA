@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace M_SAVA_API.Filters
+namespace MSAVA_API.Filters
 {
     public class AuthorizeCheckOperationFilter : IOperationFilter
     {

@@ -1,19 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using M_SAVA_DAL.Models;
-using M_SAVA_BLL.Utils;
-using M_SAVA_INF.Environment;
+using MSAVA_DAL.Models;
+using MSAVA_BLL.Utils;
+using MSAVA_INF.Environment;
 using System;
 using System.Linq;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Contexts;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Loggers;
+using MSAVA_DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace M_SAVA_BLL.Services
+namespace MSAVA_BLL.Services
 {
     public class SeedingService : ISeedingService
     {

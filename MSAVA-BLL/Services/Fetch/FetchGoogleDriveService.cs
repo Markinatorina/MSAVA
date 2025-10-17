@@ -1,6 +1,6 @@
-﻿using M_SAVA_BLL.Loggers;
-using M_SAVA_BLL.Services.Persistence;
-using M_SAVA_Shared.Models;
+using MSAVA_BLL.Loggers;
+using MSAVA_BLL.Services.Persistence;
+using MSAVA_Shared.Models;
 using System;
 using System.IO;
 using System.Net;
@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace M_SAVA_BLL.Services.Fetch
+namespace MSAVA_BLL.Services.Fetch
 {
     public class FetchGoogleDriveService
     {

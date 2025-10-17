@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace M_SAVA_INF.Utils
+namespace MSAVA_INF.Utils
 {
     public static class FileContentUtils
     {

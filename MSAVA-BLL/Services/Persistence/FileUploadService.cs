@@ -1,25 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using M_SAVA_DAL.Models;
+using MSAVA_DAL.Models;
 using System.IO;
 using System.Threading;
-using M_SAVA_Shared.Models;
+using MSAVA_Shared.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
-using M_SAVA_BLL.Utils;
+using MSAVA_BLL.Utils;
 using System.Text.Json;
-using M_SAVA_INF.Managers;
-using M_SAVA_INF.Utils;
-using M_SAVA_INF.Models;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Utils;
+using MSAVA_INF.Managers;
+using MSAVA_INF.Utils;
+using MSAVA_INF.Models;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Loggers;
+using MSAVA_DAL.Utils;
 using System.Net.Http;
 
-namespace M_SAVA_BLL.Services.Persistence
+namespace MSAVA_BLL.Services.Persistence
 {
     public class FileUploadService : IStoreFileService
     {

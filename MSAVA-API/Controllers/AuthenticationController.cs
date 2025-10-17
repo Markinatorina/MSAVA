@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-using M_SAVA_Shared.Models;
-using M_SAVA_BLL.Services.Interfaces;
+using MSAVA_Shared.Models;
+using MSAVA_BLL.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
-namespace M_SAVA_API.Controllers
+namespace MSAVA_API.Controllers
 {
     [Route("api/auth")]
     [ApiController]

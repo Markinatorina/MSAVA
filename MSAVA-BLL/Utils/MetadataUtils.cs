@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -6,7 +6,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using System.Xml;
 
-namespace M_SAVA_BLL.Utils
+namespace MSAVA_BLL.Utils
 {
     public static class MetadataUtils
     {

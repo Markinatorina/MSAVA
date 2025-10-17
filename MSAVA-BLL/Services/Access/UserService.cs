@@ -1,18 +1,18 @@
-﻿using M_SAVA_Shared.Models;
-using M_SAVA_BLL.Utils;
-using M_SAVA_DAL.Models;
+using MSAVA_Shared.Models;
+using MSAVA_BLL.Utils;
+using MSAVA_DAL.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_BLL.Loggers;
-using M_SAVA_DAL.Contexts;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Loggers;
+using MSAVA_DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace M_SAVA_BLL.Services.Access
+namespace MSAVA_BLL.Services.Access
 {
     public class UserService : IUserService
     {

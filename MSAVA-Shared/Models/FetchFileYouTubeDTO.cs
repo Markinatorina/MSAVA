@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace M_SAVA_Shared.Models
+namespace MSAVA_Shared.Models
 {
     public class FetchFileYouTubeDTO
     {

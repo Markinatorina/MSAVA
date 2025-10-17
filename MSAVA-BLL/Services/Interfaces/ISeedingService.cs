@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace M_SAVA_BLL.Services.Interfaces
+namespace MSAVA_BLL.Services.Interfaces
 {
     public interface ISeedingService
     {

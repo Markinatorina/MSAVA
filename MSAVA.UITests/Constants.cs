@@ -1,4 +1,4 @@
-namespace MSAVA.UITests;
+namespace MSAVA_App.UITests;
 
 public class Constants
 {

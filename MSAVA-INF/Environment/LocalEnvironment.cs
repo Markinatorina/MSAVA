@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using M_SAVA_INF.Models;
+using MSAVA_INF.Models;
 using Serilog.Events;
 using Serilog;
 
-namespace M_SAVA_INF.Environment
+namespace MSAVA_INF.Environment
 {
     public class LocalEnvironment : ILocalEnvironment
     {

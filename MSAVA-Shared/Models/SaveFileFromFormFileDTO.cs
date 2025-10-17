@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
-namespace M_SAVA_Shared.Models
+namespace MSAVA_Shared.Models
 {
     public class SaveFileFromFormFileDTO
     {

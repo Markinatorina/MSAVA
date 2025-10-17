@@ -1,8 +1,8 @@
-﻿using M_SAVA_INF.Models;
+using MSAVA_INF.Models;
 using System;
 using System.Collections.Generic;
 
-namespace M_SAVA_INF.Environment
+namespace MSAVA_INF.Environment
 {
     public interface ILocalEnvironment
     {

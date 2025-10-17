@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace M_SAVA_DAL.Models
+namespace MSAVA_DAL.Models
 {
     public class SavedFileDataDB : IIdentifiableDB
     {

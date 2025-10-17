@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using M_SAVA_BLL.Utils;
+using MSAVA_BLL.Utils;
 
-namespace M_SAVA_API.Handlers
+namespace MSAVA_API.Handlers
 {
     public class NotBannedRequirement : IAuthorizationRequirement { }
 

@@ -1,15 +1,15 @@
-﻿using M_SAVA_Shared.Models;
+using MSAVA_Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using M_SAVA_BLL.Services.Interfaces;
+using MSAVA_BLL.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
-using M_SAVA_API.Attributes;
+using MSAVA_API.Attributes;
 
-namespace M_SAVA_API.Controllers
+namespace MSAVA_API.Controllers
 {
     [Route("api/files/retrieve")]
     [ApiController]

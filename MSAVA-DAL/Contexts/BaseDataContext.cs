@@ -1,4 +1,4 @@
-﻿using M_SAVA_DAL.Models;
+using MSAVA_DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace M_SAVA_DAL.Contexts
+namespace MSAVA_DAL.Contexts
 {
     public class BaseDataContext : DbContext
     {

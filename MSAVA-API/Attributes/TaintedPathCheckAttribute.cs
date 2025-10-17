@@ -1,6 +1,6 @@
 using System;
 
-namespace M_SAVA_API.Attributes
+namespace MSAVA_API.Attributes
 {
     [AttributeUsage(AttributeTargets.Parameter)]
     public class TaintedPathCheckAttribute : Attribute

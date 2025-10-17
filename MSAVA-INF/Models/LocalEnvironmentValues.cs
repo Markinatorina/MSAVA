@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Serilog;
 using Serilog.Events;
 
-namespace M_SAVA_INF.Models
+namespace MSAVA_INF.Models
 {
     public class LocalEnvironmentValues
     {

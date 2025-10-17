@@ -1,4 +1,4 @@
-using M_SAVA_API.Attributes;
+using MSAVA_API.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace M_SAVA_API.Filters
+namespace MSAVA_API.Filters
 {
     public class TaintedPathFilter : IActionFilter
     {

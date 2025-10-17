@@ -4,6 +4,7 @@
     "Uno.Sdk": "6.3.28"
   },
   "sdk": {
+    "version": "10.0.100-rc.2.25502.107",
     "allowPrerelease": true
   }
 }

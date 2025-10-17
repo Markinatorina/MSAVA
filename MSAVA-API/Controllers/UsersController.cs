@@ -1,10 +1,10 @@
-﻿using M_SAVA_BLL.Services.Interfaces;
-using M_SAVA_DAL.Models;
+using MSAVA_BLL.Services.Interfaces;
+using MSAVA_DAL.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace M_SAVA_API.Controllers
+namespace MSAVA_API.Controllers
 {
     [Route("api/users")]
     [ApiController]

@@ -1,4 +1,6 @@
-namespace MSAVA_App.Presentation;
+using MSAVA_App.Presentation.Welcome;
+
+namespace MSAVA_App.Presentation.Login;
 
 public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
 {

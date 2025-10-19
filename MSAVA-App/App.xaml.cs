@@ -1,4 +1,13 @@
+using MSAVA_App.Presentation.Login;
+using MSAVA_App.Presentation.Welcome;
 using Uno.Resizetizer;
+using MSAVA_App.Services.Authentication;
+using System.Text;
+using System.Text.Json;
+using System.Net.Http.Json;
+using MSAVA_Shared.Models;
+using MSAVA_App.Services.Api;
+using MSAVA_App.Services.Navigation;
 
 namespace MSAVA_App;
 public partial class App : Application
@@ -69,52 +78,46 @@ public partial class App : Application
                 // DelegatingHandler will be automatically injected
                 services.AddTransient<DelegatingHandler, DebugHttpHandler>();
 #endif
-
+                    // Named HttpClient for the API (ASP.NET Core default dev ports)
+                    services.AddHttpClient("MSAVA-Api", client =>
+                    {
+                        // MSAVA-API runs on HTTPS port 7029 in development
+                        client.BaseAddress = new Uri("https://localhost:7029/");
+                    });
                 })
                 .UseAuthentication(auth =>
-    auth.AddCustom(custom =>
-            custom
-                .Login((sp, dispatcher, credentials, cancellationToken) =>
+                auth.AddCustom(custom =>
+                        custom
+                .Login(async (sp, dispatcher, credentials, cancellationToken) =>
                 {
-                    // TODO: Write code to process credentials that are passed into the LoginAsync method
-                    if (credentials?.TryGetValue(nameof(LoginModel.Username), out var username) ?? false &&
-                        !username.IsNullOrEmpty())
-                    {
-                        // Return IDictionary containing any tokens used by service calls or in the app
-                        credentials ??= new Dictionary<string, string>();
-                        credentials[TokenCacheExtensions.AccessTokenKey] = "SampleToken";
-                        credentials[TokenCacheExtensions.RefreshTokenKey] = "RefreshToken";
-                        credentials["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
-                        return ValueTask.FromResult<IDictionary<string, string>?>(credentials);
-                    }
+                    // Delegate to AuthenticationService; only succeed if API returns a token
+                    var authService = sp.GetRequiredService<AuthenticationService>();
 
-                    // Return null/default to fail the LoginAsync method
-                    return ValueTask.FromResult<IDictionary<string, string>?>(default);
+                    if (!(credentials?.TryGetValue(nameof(LoginModel.Username), out var username) ?? false) || string.IsNullOrWhiteSpace(username))
+                        return default;
+
+                    if (!(credentials?.TryGetValue(nameof(LoginModel.Password), out var password) ?? false) || string.IsNullOrWhiteSpace(password))
+                        return default;
+
+                    var token = await authService.LoginAsync(username!, password!, cancellationToken);
+                    if (string.IsNullOrWhiteSpace(token))
+                        return default; // fail login
+
+                    credentials ??= new Dictionary<string, string>();
+                    credentials[TokenCacheExtensions.AccessTokenKey] = token!;
+                    return credentials;
                 })
                 .Refresh((sp, tokenDictionary, cancellationToken) =>
                 {
-                    // TODO: Write code to refresh tokens using the currently stored tokens
-                    if ((tokenDictionary?.TryGetValue(TokenCacheExtensions.RefreshTokenKey, out var refreshToken) ?? false) &&
-                        !refreshToken.IsNullOrEmpty() &&
-                        (tokenDictionary?.TryGetValue("Expiry", out var expiry) ?? false) &&
-                        DateTime.TryParse(expiry, out var tokenExpiry) &&
-                        tokenExpiry > DateTime.Now)
-                    {
-                        // Return IDictionary containing any tokens used by service calls or in the app
-                        tokenDictionary ??= new Dictionary<string, string>();
-                        tokenDictionary[TokenCacheExtensions.AccessTokenKey] = "NewSampleToken";
-                        tokenDictionary["Expiry"] = DateTime.Now.AddMinutes(5).ToString("g");
-                        return ValueTask.FromResult<IDictionary<string, string>?>(tokenDictionary);
-                    }
-
-                    // Return null/default to fail the Refresh method
+                    // No refresh implemented; require re-login when invalid
                     return ValueTask.FromResult<IDictionary<string, string>?>(default);
                 }), name: "CustomAuth")
                 )
                 .ConfigureServices((context, services) =>
                 {
-                    // TODO: Register your services
-                    //services.AddSingleton<IMyService, MyService>();
+                    services.AddSingleton<AuthenticationService>();
+                    services.AddSingleton<ApiService>();
+                    services.AddSingleton<NavigationService>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );
@@ -142,23 +145,5 @@ public partial class App : Application
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
-    {
-        views.Register(
-            new ViewMap(ViewModel: typeof(ShellModel)),
-            new ViewMap<LoginPage, LoginModel>(),
-            new ViewMap<MainPage, MainModel>(),
-            new DataViewMap<SecondPage, SecondModel, Entity>()
-        );
-
-        routes.Register(
-            new RouteMap("", View: views.FindByViewModel<ShellModel>(),
-                Nested:
-                [
-                    new ("Login", View: views.FindByViewModel<LoginModel>()),
-                    new ("Main", View: views.FindByViewModel<MainModel>(), IsDefault:true),
-                    new ("Second", View: views.FindByViewModel<SecondModel>()),
-                ]
-            )
-        );
-    }
+        => Routes.Register(views, routes);
 }

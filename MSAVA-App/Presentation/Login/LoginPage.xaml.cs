@@ -1,4 +1,4 @@
-namespace MSAVA_App.Presentation;
+namespace MSAVA_App.Presentation.Login;
 
 public sealed partial class LoginPage : Page
 {

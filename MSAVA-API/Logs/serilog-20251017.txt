@@ -1,6 +1,0 @@
-[2025-10-17 13:23:36.059 INF] Serilog configured with Information level: "Information", Rolling Interval: "Day", Retained File Count Limit: null, File Size Limit Bytes: 10485760, Roll On File Size Limit: true {"EnvironmentName":"Development","MachineName":"DESKTOP-MRFDRPT","ThreadId":2,"ProcessId":21056}
-[2025-10-17 13:23:37.789 INF] Executed DbCommand (49ms) [Parameters=[@__adminUsername_0='?'], CommandType='"Text"', CommandTimeout='30']
-SELECT u."Id", u."CreatedAt", u."InviteCodeId", u."IsAdmin", u."IsBanned", u."IsWhitelisted", u."PasswordHash", u."PasswordSalt", u."Username"
-FROM "Users" AS u
-WHERE u."Username" = @__adminUsername_0
-LIMIT 1 {"EventId":{"Id":20101,"Name":"Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted"},"SourceContext":"Microsoft.EntityFrameworkCore.Database.Command","EnvironmentName":"Development","MachineName":"DESKTOP-MRFDRPT","ThreadId":2,"ProcessId":21056}

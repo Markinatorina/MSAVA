@@ -1,4 +1,4 @@
-namespace MSAVA_App.Presentation;
+namespace MSAVA_App.Presentation.Welcome;
 
 public partial record MainModel
 {

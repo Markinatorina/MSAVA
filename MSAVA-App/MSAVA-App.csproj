@@ -56,5 +56,13 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
+    
+  <ItemGroup>
+    <ProjectReference Include="..\MSAVA-Shared\MSAVA-Shared.csproj" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Folder Include="Presentation\FileManagement\" />
+  </ItemGroup>
 
 </Project>

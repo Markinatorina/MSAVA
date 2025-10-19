@@ -19,8 +19,8 @@ wwwroot/_framework/
 service-worker-assets.js
 
 # MSAVA logs
-M-SAVA-API/Logs/*
-!M-SAVA-API/Logs/dummy.txt
+MSAVA-API/Logs/*
+!MSAVA-API/Logs/dummy.txt
 
 # dotenv files
 .env

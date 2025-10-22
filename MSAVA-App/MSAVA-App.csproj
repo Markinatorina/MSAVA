@@ -62,7 +62,15 @@
   </ItemGroup>
     
   <ItemGroup>
-    <Folder Include="Presentation\FileManagement\" />
+    <Compile Update="Presentation\FileManagement\FileManagementPage.xaml.cs">
+      <DependentUpon>FileManagementPage.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Page Update="Presentation\FileManagement\FileManagementPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
 </Project>

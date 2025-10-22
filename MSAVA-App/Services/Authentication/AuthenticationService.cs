@@ -10,7 +10,7 @@ using MSAVA_Shared.Models;
 using MSAVA_App.Services.Api;
 
 namespace MSAVA_App.Services.Authentication;
-internal class AuthenticationService
+public class AuthenticationService
 {
     private readonly ILogger<AuthenticationService> _logger;
     private readonly ApiService _api;

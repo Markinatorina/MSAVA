@@ -15,15 +15,63 @@ namespace MSAVA_BLL.Services.Retrieval
     public class FileSearchService : ISearchFileService
     {
         private readonly BaseDataContext _context;
+        private readonly IUserService _userService;
 
-        public FileSearchService(BaseDataContext context)
+        public FileSearchService(BaseDataContext context, IUserService userService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         private static SearchFileDataDTO MapToDTO(SavedFileDataDB db)
         {
             return MappingUtils.MapSearchFileDataDTO(db);
+        }
+
+        private static IQueryable<SavedFileDataDB> ApplyAccessFilter(IQueryable<SavedFileDataDB> query, SessionDTO session)
+        {
+            var userId = session.UserId;
+            var groupIds = session.AccessGroups;
+
+            // Allow if:
+            // - File is public (PublicViewing true)
+            // - User is owner
+            // - User is in the file reference access group
+            return query.Where(f =>
+                f.PublicViewing
+                || f.OwnerId == userId
+                || (f.FileReference != null && groupIds.Contains(f.FileReference.AccessGroupId))
+            );
+        }
+
+        public async Task<List<Guid>> GetAllFileGuidsAsync(CancellationToken cancellationToken = default)
+        {
+            var session = _userService.GetSessionClaims();
+
+            var baseQuery = _context.FileData
+                .AsNoTracking()
+                .AsQueryable();
+
+            var filtered = ApplyAccessFilter(baseQuery, session);
+
+            return await filtered
+                .Select(f => f.Id)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<SearchFileDataDTO>> GetAllFileMetadataAsync(CancellationToken cancellationToken = default)
+        {
+            var session = _userService.GetSessionClaims();
+
+            var baseQuery = _context.FileData
+                .AsNoTracking()
+                .AsQueryable();
+
+            var filtered = ApplyAccessFilter(baseQuery, session)
+                .Include(f => f.FileReference);
+
+            var dbList = await filtered.ToListAsync(cancellationToken);
+            return dbList.Select(MapToDTO).ToList();
         }
 
         public async Task<List<Guid>> GetFileGuidsByAllFieldsAsync(
@@ -33,7 +81,9 @@ namespace MSAVA_BLL.Services.Retrieval
             string? description,
             CancellationToken cancellationToken = default)
         {
-            var query = _context.FileData
+            var session = _userService.GetSessionClaims();
+
+            var baseQuery = _context.FileData
                 .AsNoTracking()
                 .Where(f =>
                     (string.IsNullOrWhiteSpace(tag) || (f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == tag.ToLower()))) &&
@@ -42,7 +92,9 @@ namespace MSAVA_BLL.Services.Retrieval
                     (string.IsNullOrWhiteSpace(description) || (f.Description != null && f.Description.ToLower().Contains(description.ToLower())))
                 );
 
-            return await query.Select(f => f.Id).ToListAsync(cancellationToken);
+            var filtered = ApplyAccessFilter(baseQuery, session);
+
+            return await filtered.Select(f => f.Id).ToListAsync(cancellationToken);
         }
 
         public async Task<List<SearchFileDataDTO>> GetFileDataByAllFieldsAsync(
@@ -52,9 +104,10 @@ namespace MSAVA_BLL.Services.Retrieval
             string? description,
             CancellationToken cancellationToken = default)
         {
-            var query = _context.FileData
+            var session = _userService.GetSessionClaims();
+
+            var baseQuery = _context.FileData
                 .AsNoTracking()
-                .Include(f => f.FileReference)
                 .Where(f =>
                     (string.IsNullOrWhiteSpace(tag) || (f.Tags != null && f.Tags.Any(t => t != null && t.ToLower() == tag.ToLower()))) &&
                     (string.IsNullOrWhiteSpace(category) || (f.Categories != null && f.Categories.Any(c => c != null && c.ToLower() == category.ToLower()))) &&
@@ -62,7 +115,10 @@ namespace MSAVA_BLL.Services.Retrieval
                     (string.IsNullOrWhiteSpace(description) || (f.Description != null && f.Description.ToLower().Contains(description.ToLower())))
                 );
 
-            var dbList = await query.ToListAsync(cancellationToken);
+            var filtered = ApplyAccessFilter(baseQuery, session)
+                .Include(f => f.FileReference);
+
+            var dbList = await filtered.ToListAsync(cancellationToken);
             return dbList.Select(MapToDTO).ToList();
         }
     }

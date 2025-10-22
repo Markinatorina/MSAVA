@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using MSAVA_Shared.Models;
 using MSAVA_App.Services.Api;
 using MSAVA_App.Services.Navigation;
+using MSAVA_App.Services.Files;
 
 namespace MSAVA_App;
 public partial class App : Application
@@ -118,6 +119,7 @@ public partial class App : Application
                     services.AddSingleton<AuthenticationService>();
                     services.AddSingleton<ApiService>();
                     services.AddSingleton<NavigationService>();
+                    services.AddSingleton<FileRetrievalService>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );

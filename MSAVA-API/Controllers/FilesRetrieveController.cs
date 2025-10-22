@@ -17,12 +17,12 @@ namespace MSAVA_API.Controllers
     public class FilesRetrieveController : ControllerBase
     {
         private readonly IReturnFileService _returnFileService;
-        private readonly IWebHostEnvironment _env;
+        private readonly ISearchFileService _searchFileService;
 
-        public FilesRetrieveController(IReturnFileService returnFileService, IWebHostEnvironment env)
+        public FilesRetrieveController(IReturnFileService returnFileService, ISearchFileService searchFileService)
         {
             _returnFileService = returnFileService ?? throw new ArgumentNullException(nameof(returnFileService));
-            _env = env;
+            _searchFileService = searchFileService ?? throw new ArgumentNullException(nameof(searchFileService));
         }
 
         [HttpGet("stream/{refId:guid}")]
@@ -59,6 +59,27 @@ namespace MSAVA_API.Controllers
             PhysicalReturnFileDTO fileData = _returnFileService.GetPhysicalFileReturnDataByPath(fileNameWithExtension);
 
             return PhysicalFile(fileData.FilePath, fileData.ContentType, fileData.FileName, enableRangeProcessing: true);
+        }
+
+        [HttpGet("meta/all")]
+        public async Task<ActionResult<List<SearchFileDataDTO>>> GetAllFileMetadata(CancellationToken cancellationToken)
+        {
+            var result = await _searchFileService.GetAllFileMetadataAsync(cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("meta/all/id")]
+        public async Task<ActionResult<List<Guid>>> SearchFileGuidsByAllFields([FromQuery] string? tag, [FromQuery] string? category, [FromQuery] string? name, [FromQuery] string? description, CancellationToken cancellationToken)
+        {
+            var result = await _searchFileService.GetFileGuidsByAllFieldsAsync(tag, category, name, description, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet("meta/all/data")]
+        public async Task<ActionResult<List<SearchFileDataDTO>>> SearchFilesByAllFields([FromQuery] string? tag, [FromQuery] string? category, [FromQuery] string? name, [FromQuery] string? description, CancellationToken cancellationToken)
+        {
+            var result = await _searchFileService.GetFileDataByAllFieldsAsync(tag, category, name, description, cancellationToken);
+            return Ok(result);
         }
     }
 }

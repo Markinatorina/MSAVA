@@ -1,3 +1,5 @@
+using MSAVA_App.Presentation.FileManagement;
+
 namespace MSAVA_App.Presentation.Welcome;
 
 public partial record MainModel
@@ -25,6 +27,11 @@ public partial record MainModel
     {
         var name = await Name;
         await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
+    }
+
+    public async Task GoToFiles()
+    {
+        await _navigator.NavigateViewModelAsync<FileManagementModel>(this);
     }
 
     public async ValueTask Logout(CancellationToken token)

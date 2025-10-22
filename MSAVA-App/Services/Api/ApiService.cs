@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace MSAVA_App.Services.Api;
-internal class ApiService
+public class ApiService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ApiService> _logger;

@@ -25,7 +25,6 @@
       https://aka.platform.uno/singleproject-features
     -->
     <UnoFeatures>
-      Material;
       Dsp;
       MediaElement;
       Hosting;
@@ -55,6 +54,7 @@
     
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="WinUI.TableView" />
   </ItemGroup>
     
   <ItemGroup>

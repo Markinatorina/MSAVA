@@ -6,8 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MSAVA_Shared.Models"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    xmlns:tv="using:WinUI.TableView"
+    mc:Ignorable="d">
 
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"
@@ -19,63 +19,10 @@
                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
         <Grid Grid.Row="1" Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <ScrollViewer>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Header Row -->
-                    <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*">
-                        <TextBlock Text="DataId" FontWeight="SemiBold"/>
-                        <TextBlock Text="RefId" Grid.Column="1" FontWeight="SemiBold"/>
-                        <TextBlock Text="FilePath" Grid.Column="2" FontWeight="SemiBold"/>
-                        <TextBlock Text="Name" Grid.Column="3" FontWeight="SemiBold"/>
-                        <TextBlock Text="Description" Grid.Column="4" FontWeight="SemiBold"/>
-                        <TextBlock Text="MimeType" Grid.Column="5" FontWeight="SemiBold"/>
-                        <TextBlock Text="FileExtension" Grid.Column="6" FontWeight="SemiBold"/>
-                        <TextBlock Text="Tags" Grid.Column="7" FontWeight="SemiBold"/>
-                        <TextBlock Text="Categories" Grid.Column="8" FontWeight="SemiBold"/>
-                        <TextBlock Text="SizeInBytes" Grid.Column="9" FontWeight="SemiBold"/>
-                        <TextBlock Text="Checksum" Grid.Column="10" FontWeight="SemiBold"/>
-                        <TextBlock Text="PublicViewing" Grid.Column="11" FontWeight="SemiBold"/>
-                        <TextBlock Text="DownloadCount" Grid.Column="12" FontWeight="SemiBold"/>
-                        <TextBlock Text="SavedAt" Grid.Column="13" FontWeight="SemiBold"/>
-                        <TextBlock Text="LastModifiedAt" Grid.Column="14" FontWeight="SemiBold"/>
-                        <TextBlock Text="LastModifiedById" Grid.Column="15" FontWeight="SemiBold"/>
-                    </Grid>
-
-                    <!-- Rows -->
-                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Files}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*" Padding="0,8">
-                                    <TextBlock Text="{Binding DataId}"/>
-                                    <TextBlock Text="{Binding RefId}" Grid.Column="1"/>
-                                    <TextBlock Text="{Binding FilePath}" Grid.Column="2"/>
-                                    <TextBlock Text="{Binding Name}" Grid.Column="3"/>
-                                    <TextBlock Text="{Binding Description}" Grid.Column="4"/>
-                                    <TextBlock Text="{Binding MimeType}" Grid.Column="5"/>
-                                    <TextBlock Text="{Binding FileExtension}" Grid.Column="6"/>
-                                    <TextBlock Text="{Binding Tags.Length, TargetNullValue=0}" Grid.Column="7"/>
-                                    <TextBlock Text="{Binding Categories.Length, TargetNullValue=0}" Grid.Column="8"/>
-                                    <TextBlock Text="{Binding SizeInBytes}" Grid.Column="9"/>
-                                    <TextBlock Text="{Binding Checksum}" Grid.Column="10"/>
-                                    <TextBlock Text="{Binding PublicViewing}" Grid.Column="11"/>
-                                    <TextBlock Text="{Binding DownloadCount}" Grid.Column="12"/>
-                                    <TextBlock Text="{Binding SavedAt}" Grid.Column="13"/>
-                                    <TextBlock Text="{Binding LastModifiedAt}" Grid.Column="14"/>
-                                    <TextBlock Text="{Binding LastModifiedById}" Grid.Column="15"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Grid>
-            </ScrollViewer>
+            <tv:TableView MaxColumnWidth="300" MinColumnWidth="100" RowMinHeight="50" ShowExportOptions="True"
+                ItemsSource="{Binding Files}" />
         </Grid>
 
-        <!-- Floating actions container -->
         <StackPanel Grid.RowSpan="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
@@ -83,7 +30,7 @@
                     Margin="16"
                     Spacing="12"
                     Canvas.ZIndex="1000">
-            
+
             <!-- Floating refresh button -->
             <Button Width="48"
                     Height="48"

@@ -22,7 +22,6 @@ namespace MSAVA_Shared.Models
         public uint DownloadCount { get; set; }
         public DateTime SavedAt { get; set; }
         public DateTime LastModifiedAt { get; set; }
-        public Guid OwnerId { get; set; }
         public Guid LastModifiedById { get; set; }
     }
 }

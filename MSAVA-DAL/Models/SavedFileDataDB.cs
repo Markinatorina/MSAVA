@@ -27,8 +27,8 @@ namespace MSAVA_DAL.Models
         public uint DownloadCount { get; set; } = 0;
 
         public DateTime SavedAt { get; set; } = DateTime.UtcNow;
-        public required Guid OwnerId { get; set; }
-        public UserDB? Owner { get; set; }
+        public required Guid OriginalCreator { get; set; }
+        public UserDB? Creator { get; set; }
 
         public DateTime LastModifiedAt { get; set; } = DateTime.UtcNow;
         public required Guid LastModifiedById { get; set; }

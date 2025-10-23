@@ -152,7 +152,7 @@ namespace MSAVA_BLL.Utils
             SaveFileFromStreamDTO dto,
             SavedFileReferenceDB savedFileDb,
             ulong sizeInBytes,
-            Guid owner,
+            Guid originalCreator,
             Guid lastModifiedBy
         )
         {
@@ -177,7 +177,7 @@ namespace MSAVA_BLL.Utils
                 FileExtension = dto.FileExtension,
                 Tags = tags,
                 Categories = categories,
-                OwnerId = owner,
+                OriginalCreator = originalCreator,
                 Metadata = metadata,
                 PublicViewing = dto.PublicViewing,
                 DownloadCount = 0,
@@ -188,7 +188,7 @@ namespace MSAVA_BLL.Utils
             SaveFileFromFetchDTO dto,
             SavedFileReferenceDB savedFileDb,
             ulong sizeInBytes,
-            Guid owner,
+            Guid originalCreator,
             Guid lastModifiedBy
         )
         {
@@ -214,7 +214,7 @@ namespace MSAVA_BLL.Utils
                 FileExtension = dto.FileExtension,
                 Tags = tags,
                 Categories = categories,
-                OwnerId = owner,
+                OriginalCreator = originalCreator,
                 Metadata = metadata,
                 PublicViewing = dto.PublicViewing,
                 DownloadCount = 0,
@@ -249,8 +249,7 @@ namespace MSAVA_BLL.Utils
                 DownloadCount = db.DownloadCount,
                 SavedAt = db.SavedAt,
                 LastModifiedAt = db.LastModifiedAt,
-                OwnerId = db.Owner?.Id ?? Guid.Empty,
-                LastModifiedById = db.LastModifiedBy?.Id ?? Guid.Empty
+                LastModifiedById = db.LastModifiedById
             };
         }
 

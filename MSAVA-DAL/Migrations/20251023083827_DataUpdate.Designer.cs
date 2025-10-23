@@ -4,6 +4,7 @@ using System.Text.Json;
 using MSAVA_DAL.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MSAVA_DAL.Migrations
 {
     [DbContext(typeof(BaseDataContext))]
-    partial class BaseDataContextModelSnapshot : ModelSnapshot
+    [Migration("20251023083827_DataUpdate")]
+    partial class DataUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

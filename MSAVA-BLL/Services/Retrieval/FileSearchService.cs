@@ -34,13 +34,11 @@ namespace MSAVA_BLL.Services.Retrieval
             var groupIds = session.AccessGroups;
 
             // Allow if:
-            // - File is public (PublicViewing true)
             // - User is owner
             // - User is in the file reference access group
             return query.Where(f =>
-                f.PublicViewing
-                || f.OwnerId == userId
-                || (f.FileReference != null && groupIds.Contains(f.FileReference.AccessGroupId))
+                f.FileReference != null && 
+                (groupIds.Contains(f.FileReference.AccessGroupId))
             );
         }
 

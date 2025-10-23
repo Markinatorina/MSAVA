@@ -43,7 +43,7 @@
                         <TextBlock Text="DownloadCount" Grid.Column="12" FontWeight="SemiBold"/>
                         <TextBlock Text="SavedAt" Grid.Column="13" FontWeight="SemiBold"/>
                         <TextBlock Text="LastModifiedAt" Grid.Column="14" FontWeight="SemiBold"/>
-                        <TextBlock Text="OwnerId" Grid.Column="15" FontWeight="SemiBold"/>
+                        <TextBlock Text="LastModifiedById" Grid.Column="15" FontWeight="SemiBold"/>
                     </Grid>
 
                     <!-- Rows -->
@@ -66,7 +66,7 @@
                                     <TextBlock Text="{Binding DownloadCount}" Grid.Column="12"/>
                                     <TextBlock Text="{Binding SavedAt}" Grid.Column="13"/>
                                     <TextBlock Text="{Binding LastModifiedAt}" Grid.Column="14"/>
-                                    <TextBlock Text="{Binding OwnerId}" Grid.Column="15"/>
+                                    <TextBlock Text="{Binding LastModifiedById}" Grid.Column="15"/>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -74,5 +74,37 @@
                 </Grid>
             </ScrollViewer>
         </Grid>
+
+        <!-- Floating actions container -->
+        <StackPanel Grid.RowSpan="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="16"
+                    Spacing="12"
+                    Canvas.ZIndex="1000">
+            
+            <!-- Floating refresh button -->
+            <Button Width="48"
+                    Height="48"
+                    Padding="0"
+                    CornerRadius="14"
+                    IsEnabled="{Binding IsLoaded}"
+                    Command="{Binding Refresh}"
+                    ToolTipService.ToolTip="Refresh">
+                <SymbolIcon Symbol="Sync" />
+            </Button>
+
+            <!-- Floating upload button -->
+            <Button Width="48"
+                    Height="48"
+                    Padding="0"
+                    CornerRadius="14"
+                    IsEnabled="{Binding IsLoaded}"
+                    Command="{Binding Refresh}"
+                    ToolTipService.ToolTip="Upload File">
+                <SymbolIcon Symbol="Add" />
+            </Button>
+        </StackPanel>
     </Grid>
 </Page>

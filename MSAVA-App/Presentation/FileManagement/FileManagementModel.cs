@@ -67,4 +67,7 @@ public partial record FileManagementModel : INotifyPropertyChanged
             await _dispatcher.ExecuteAsync(() => IsLoading = false);
         }
     }
+
+    // Used by Button Command binding
+    public Task Refresh() => LoadAsync();
 }

@@ -1,23 +1,22 @@
 using MSAVA_App.Presentation.FileManagement;
-using MSAVA_App.Services.Authentication;
+using MSAVA_App.Services.Session;
+using MSAVA_App.Services.Navigation;
 
 namespace MSAVA_App.Presentation.Welcome;
 
 public partial record MainModel
 {
-    private INavigator _navigator;
-    private readonly AuthenticationService _authService;
+    private readonly LocalSessionService _session;
+    private readonly NavigationService _navigation;
 
     public MainModel(
         IStringLocalizer localizer,
         IOptions<AppConfig> appInfo,
-        IAuthenticationService authentication,
-        INavigator navigator,
-        AuthenticationService authService)
+        LocalSessionService session,
+        NavigationService navigation)
     {
-        _navigator = navigator;
-        _authentication = authentication;
-        _authService = authService;
+        _session = session;
+        _navigation = navigation;
         Title = "Main";
         Title += $" - {localizer["ApplicationName"]}";
         Title += $" - {appInfo?.Value?.Environment}";
@@ -27,19 +26,18 @@ public partial record MainModel
 
     public IState<string> Name => State<string>.Value(this, () => string.Empty);
 
-    public string Username => _authService.CurrentSession?.Username ?? string.Empty;
+    public string Username => _session.CurrentSession?.Username ?? string.Empty;
 
     public string WelcomeText => string.IsNullOrWhiteSpace(Username) ? string.Empty : $"Welcome, {Username.Trim()}.";
 
     public async Task GoToFiles()
     {
-        await _navigator.NavigateViewModelAsync<FileManagementModel>(this);
+        await _navigation.NavigateViewModelAsync<FileManagementModel>(this);
     }
 
-    public async ValueTask Logout(CancellationToken token)
+    public ValueTask Logout(CancellationToken token)
     {
-        await _authentication.LogoutAsync(token);
+        _session.Logout();
+        return ValueTask.CompletedTask;
     }
-
-    private IAuthenticationService _authentication;
 }

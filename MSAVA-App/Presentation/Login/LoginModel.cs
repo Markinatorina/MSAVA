@@ -1,8 +1,10 @@
 using MSAVA_App.Presentation.Welcome;
+using MSAVA_App.Services.Navigation;
+using MSAVA_App.Services.Session;
 
 namespace MSAVA_App.Presentation.Login;
 
-public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication)
+public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, IAuthenticationService Authentication, NavigationService Navigation, LocalSessionService LocalSession)
 {
     public string Title { get; } = "Login";
 
@@ -15,11 +17,10 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
         var username = await Username ?? string.Empty;
         var password = await Password ?? string.Empty;
 
-        var success = await Authentication.LoginAsync(Dispatcher, new Dictionary<string, string> { { nameof(Username), username }, { nameof(Password), password } });
-        if (success)
+        var tokenStr = await LocalSession.LoginAsync(username, password, token);
+        if (!string.IsNullOrWhiteSpace(tokenStr))
         {
-            await Navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack);
+            await Navigation.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack, ct: token);
         }
     }
-
 }

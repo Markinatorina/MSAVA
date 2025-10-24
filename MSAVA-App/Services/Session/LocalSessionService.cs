@@ -11,16 +11,18 @@ using Microsoft.Extensions.Logging;
 using MSAVA_Shared.Models;
 using MSAVA_App.Services.Api;
 
-namespace MSAVA_App.Services.Authentication;
-public class AuthenticationService
+namespace MSAVA_App.Services.Session;
+public class LocalSessionService
 {
-    private readonly ILogger<AuthenticationService> _logger;
+    private readonly ILogger<LocalSessionService> _logger;
     private readonly ApiService _api;
 
     private string? _accessToken;
     private SessionDTO? _session;
 
-    public AuthenticationService(ILogger<AuthenticationService> logger, ApiService api)
+    public event EventHandler? LoggedOut;
+
+    public LocalSessionService(ILogger<LocalSessionService> logger, ApiService api)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _api = api ?? throw new ArgumentNullException(nameof(api));
@@ -83,6 +85,7 @@ public class AuthenticationService
         _accessToken = null;
         _session = null;
         _api.ClearAccessToken();
+        LoggedOut?.Invoke(this, EventArgs.Empty);
     }
 
     private SessionDTO? ParseSessionFromToken(string jwt)

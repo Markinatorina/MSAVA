@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace MSAVA_App.Services.LocalStorage;
+namespace MSAVA_App.Services.Storage;
 
 internal class LocalStorageService
 {

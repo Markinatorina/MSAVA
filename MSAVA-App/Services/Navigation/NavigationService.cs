@@ -4,19 +4,24 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MSAVA_App.Presentation.Login;
+using MSAVA_App.Services.Session;
 using Uno.Extensions.Navigation;
 
 namespace MSAVA_App.Services.Navigation;
 
-internal class NavigationService
+public class NavigationService
 {
     private static readonly ConcurrentDictionary<Type, NavigationServiceOptions> _options = new();
-    private readonly IAuthenticationService _auth;
+    private readonly LocalSessionService _session;
+    private INavigator? _navigator;
 
-    public NavigationService(IAuthenticationService auth)
+    public NavigationService(LocalSessionService session)
     {
-        _auth = auth ?? throw new ArgumentNullException(nameof(auth));
+        _session = session ?? throw new ArgumentNullException(nameof(session));
     }
+
+    public void SetNavigator(INavigator navigator)
+        => _navigator = navigator ?? throw new ArgumentNullException(nameof(navigator));
 
     public static void RegisterFor<TViewModel>(NavigationServiceOptions options) where TViewModel : class
         => _options[typeof(TViewModel)] = options ?? new NavigationServiceOptions();
@@ -24,24 +29,21 @@ internal class NavigationService
     public static NavigationServiceOptions GetOptionsFor<TViewModel>() where TViewModel : class
         => _options.TryGetValue(typeof(TViewModel), out var opts) ? opts : new NavigationServiceOptions();
 
-    public async Task<bool> EnsureAccessAsync<TViewModel>(CancellationToken ct = default) where TViewModel : class
+    public Task<bool> EnsureAccessAsync<TViewModel>(CancellationToken ct = default) where TViewModel : class
     {
         var opts = GetOptionsFor<TViewModel>();
         if (opts.Public)
-            return true;
+            return Task.FromResult(true);
 
-        // Protected: require authenticated session
-        var isAuthenticated = await _auth.RefreshAsync(ct);
-        return isAuthenticated;
+        return Task.FromResult(_session.IsLoggedIn);
     }
 
     public async Task<bool> NavigateViewModelAsync<TViewModel>(object owner,
-        INavigator navigator,
         string? qualifier = null,
         object? data = null,
         CancellationToken ct = default) where TViewModel : class
     {
-        if (navigator is null) throw new ArgumentNullException(nameof(navigator));
+        var navigator = _navigator ?? throw new InvalidOperationException("Navigator not initialized. Call NavigationService.SetNavigator at app startup (e.g., from ShellModel).");
 
         var allowed = await EnsureAccessAsync<TViewModel>(ct);
         if (!allowed)

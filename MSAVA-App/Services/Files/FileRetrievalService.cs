@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MSAVA_App.Services.Api;
-using MSAVA_App.Services.Authentication;
 using MSAVA_Shared.Models;
 
 namespace MSAVA_App.Services.Files

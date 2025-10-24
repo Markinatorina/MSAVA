@@ -1,7 +1,7 @@
 using MSAVA_App.Presentation.Login;
 using MSAVA_App.Presentation.Welcome;
 using Uno.Resizetizer;
-using MSAVA_App.Services.Authentication;
+using MSAVA_App.Services.Session;
 using System.Text;
 using System.Text.Json;
 using System.Net.Http.Json;
@@ -91,8 +91,7 @@ public partial class App : Application
                         custom
                 .Login(async (sp, dispatcher, credentials, cancellationToken) =>
                 {
-                    // Delegate to AuthenticationService; only succeed if API returns a token
-                    var authService = sp.GetRequiredService<AuthenticationService>();
+                    var session = sp.GetRequiredService<LocalSessionService>();
 
                     if (!(credentials?.TryGetValue(nameof(LoginModel.Username), out var username) ?? false) || string.IsNullOrWhiteSpace(username))
                         return default;
@@ -100,7 +99,7 @@ public partial class App : Application
                     if (!(credentials?.TryGetValue(nameof(LoginModel.Password), out var password) ?? false) || string.IsNullOrWhiteSpace(password))
                         return default;
 
-                    var token = await authService.LoginAsync(username!, password!, cancellationToken);
+                    var token = await session.LoginAsync(username!, password!, cancellationToken);
                     if (string.IsNullOrWhiteSpace(token))
                         return default; // fail login
 
@@ -110,13 +109,12 @@ public partial class App : Application
                 })
                 .Refresh((sp, tokenDictionary, cancellationToken) =>
                 {
-                    // No refresh implemented; require re-login when invalid
                     return ValueTask.FromResult<IDictionary<string, string>?>(default);
                 }), name: "CustomAuth")
                 )
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddSingleton<AuthenticationService>();
+                    services.AddSingleton<LocalSessionService>();
                     services.AddSingleton<ApiService>();
                     services.AddSingleton<NavigationService>();
                     services.AddSingleton<FileRetrievalService>();

@@ -1,24 +1,26 @@
 using MSAVA_App.Presentation.Login;
+using MSAVA_App.Services.Navigation;
+using MSAVA_App.Services.Session;
 
 namespace MSAVA_App.Presentation;
 
 public class ShellModel
 {
-    private readonly INavigator _navigator;
+    private readonly NavigationService _navigation;
 
     public ShellModel(
-        IAuthenticationService authentication,
-        INavigator navigator)
+        LocalSessionService localSession,
+        INavigator navigator,
+        NavigationService navigation)
     {
-        _navigator = navigator;
-        _authentication = authentication;
-        _authentication.LoggedOut += LoggedOut;
+        _navigation = navigation;
+        _navigation.SetNavigator(navigator);
+        localSession.LoggedOut += OnLoggedOut;
     }
 
-    private async void LoggedOut(object? sender, EventArgs e)
+    private async void OnLoggedOut(object? sender, EventArgs e)
     {
-        await _navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.ClearBackStack);
+        // Centralized navigation to Login using NavigationService
+        await _navigation.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.ClearBackStack);
     }
-
-    private readonly IAuthenticationService _authentication;
 }

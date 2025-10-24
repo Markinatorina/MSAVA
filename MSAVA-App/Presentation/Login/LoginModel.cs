@@ -20,7 +20,7 @@ public partial record LoginModel(IDispatcher Dispatcher, INavigator Navigator, I
         var tokenStr = await LocalSession.LoginAsync(username, password, token);
         if (!string.IsNullOrWhiteSpace(tokenStr))
         {
-            await Navigation.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.ClearBackStack, ct: token);
+            await Navigation.NavigateTo<MainModel>(this, qualifier: Qualifiers.ClearBackStack, ct: token);
         }
     }
 }

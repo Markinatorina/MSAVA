@@ -32,7 +32,7 @@ public partial record MainModel
 
     public async Task GoToFiles()
     {
-        await _navigation.NavigateViewModelAsync<FileManagementModel>(this);
+        await _navigation.NavigateTo<FileManagementModel>(this);
     }
 
     public ValueTask Logout(CancellationToken token)

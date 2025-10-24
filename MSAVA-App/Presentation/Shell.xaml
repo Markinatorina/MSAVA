@@ -11,9 +11,6 @@
   <Border Background="{ThemeResource BackgroundBrush}">
     <Grid RowDefinitions="Auto,*,Auto">
       <!-- Global Header -->
-      <utu:NavigationBar Grid.Row="0"
-                         Content="{Binding ElementName=Splash, Path=Content.DataContext.Title}"
-                         Visibility="{x:Bind HeaderVisibility, Mode=OneWay}" />
 
       <!-- Navigation region -->
       <utu:ExtendedSplashScreen x:Name="Splash"

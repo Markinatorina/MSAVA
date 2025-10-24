@@ -129,19 +129,7 @@ public partial class App : Application
         MainWindow.SetWindowIcon();
 
         Host = await builder.NavigateAsync<Shell>
-            (initialNavigate: async (services, navigator) =>
-            {
-                var auth = services.GetRequiredService<IAuthenticationService>();
-                var authenticated = await auth.RefreshAsync();
-                if (authenticated)
-                {
-                    await navigator.NavigateViewModelAsync<MainModel>(this, qualifier: Qualifiers.Nested);
-                }
-                else
-                {
-                    await navigator.NavigateViewModelAsync<LoginModel>(this, qualifier: Qualifiers.Nested);
-                }
-            });
+            (initialNavigate: (services, navigator) => Task.CompletedTask);
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)

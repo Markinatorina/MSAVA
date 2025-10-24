@@ -18,11 +18,6 @@
         <TextBlock Text="Loading, please wait..."
                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-        <Grid Grid.Row="1" Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <tv:TableView MaxColumnWidth="300" MinColumnWidth="100" RowMinHeight="50" ShowExportOptions="True"
-                ItemsSource="{Binding Files}" />
-        </Grid>
-
         <StackPanel Grid.RowSpan="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
@@ -31,27 +26,43 @@
                     Spacing="12"
                     Canvas.ZIndex="1000">
 
-            <!-- Floating refresh button -->
+            <!-- Floating save & refresh button -->
             <Button Width="48"
                     Height="48"
                     Padding="0"
                     CornerRadius="14"
                     IsEnabled="{Binding IsLoaded}"
-                    Command="{Binding Refresh}"
-                    ToolTipService.ToolTip="Refresh">
+                    Command="{Binding Save}"
+                    ToolTipService.ToolTip="Save">
                 <SymbolIcon Symbol="Sync" />
             </Button>
-
-            <!-- Floating upload button -->
-            <Button Width="48"
-                    Height="48"
-                    Padding="0"
-                    CornerRadius="14"
-                    IsEnabled="{Binding IsLoaded}"
-                    Command="{Binding Refresh}"
-                    ToolTipService.ToolTip="Upload File">
-                <SymbolIcon Symbol="Add" />
-            </Button>
         </StackPanel>
+
+        <Grid Grid.Row="1" Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <NavigationView IsBackButtonVisible="Collapsed" x:Name="FilesNav"
+                            DataContext="{Binding}"
+                            PaneDisplayMode="LeftCompact"
+                            IsSettingsVisible="False"
+                            ItemInvoked="FilesNav_ItemInvoked">
+                <NavigationView.MenuItems>
+                    <NavigationViewItem Icon="View" Content="Your Files" Tag="YourFiles" SelectsOnInvoked="False" />
+                </NavigationView.MenuItems>
+                <NavigationView.FooterMenuItems>
+                    <NavigationViewItem Icon="Cancel" Content="Exit" Tag="Exit" SelectsOnInvoked="False" />
+                </NavigationView.FooterMenuItems>
+
+                <tv:TableView MaxColumnWidth="300" MinColumnWidth="150" RowMinHeight="50"
+                              ShowExportOptions="True"
+                              HeaderGridLinesVisibility="All"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesStrokeThickness="2"
+                              HorizontalGridLinesStroke="#12FFFFFF"
+                              VerticalGridLinesStrokeThickness="2"
+                              VerticalGridLinesStroke="#12FFFFFF"
+                              AlternateRowBackground="#50515C6B"
+                              AllowDrop="True" CanDragItems="True" CanReorderItems="True"
+                              ItemsSource="{Binding Files}" />
+            </NavigationView>
+        </Grid>
     </Grid>
 </Page>

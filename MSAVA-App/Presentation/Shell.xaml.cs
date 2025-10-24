@@ -1,3 +1,6 @@
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+
 namespace MSAVA_App.Presentation;
 
 public sealed partial class Shell : UserControl, IContentControlProvider
@@ -6,16 +9,19 @@ public sealed partial class Shell : UserControl, IContentControlProvider
     {
         this.InitializeComponent();
     }
+
     public ContentControl ContentControl => Splash;
 
     public Visibility HeaderVisibility
     {
-        get => _headerVisibility;
-        set
-        {
-            if (_headerVisibility == value) return;
-            _headerVisibility = value;
-        }
+        get => (Visibility)GetValue(HeaderVisibilityProperty);
+        set => SetValue(HeaderVisibilityProperty, value);
     }
-    private Visibility _headerVisibility = Visibility.Visible;
+
+    public static readonly DependencyProperty HeaderVisibilityProperty =
+        DependencyProperty.Register(
+            nameof(HeaderVisibility),
+            typeof(Visibility),
+            typeof(Shell),
+            new PropertyMetadata(Visibility.Visible));
 }

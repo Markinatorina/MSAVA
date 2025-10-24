@@ -9,28 +9,45 @@
       d:DesignHeight="300"
       d:DesignWidth="400">
   <Border Background="{ThemeResource BackgroundBrush}">
-    <utu:ExtendedSplashScreen x:Name="Splash"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                HorizontalContentAlignment="Stretch"
-                VerticalContentAlignment="Stretch">
-      <utu:ExtendedSplashScreen.LoadingContentTemplate>
-        <DataTemplate>
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="2*" />
-              <RowDefinition />
-            </Grid.RowDefinitions>
+    <Grid RowDefinitions="Auto,*,Auto">
+      <!-- Global Header -->
+      <utu:NavigationBar Grid.Row="0"
+                         Content="{Binding ElementName=Splash, Path=Content.DataContext.Title}"
+                         Visibility="{x:Bind HeaderVisibility, Mode=OneWay}" />
 
-            <ProgressRing IsActive="True"
-                  Grid.Row="1"
-                  VerticalAlignment="Center"
-                  HorizontalAlignment="Center"
-                  Height="100"
-                  Width="100" />
-          </Grid>
-        </DataTemplate>
-      </utu:ExtendedSplashScreen.LoadingContentTemplate>
-    </utu:ExtendedSplashScreen>
+      <!-- Navigation region -->
+      <utu:ExtendedSplashScreen x:Name="Splash"
+                                Grid.Row="1"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch">
+        <utu:ExtendedSplashScreen.LoadingContentTemplate>
+          <DataTemplate>
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="2*" />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+
+              <ProgressRing IsActive="True"
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Height="100"
+                            Width="100" />
+            </Grid>
+          </DataTemplate>
+        </utu:ExtendedSplashScreen.LoadingContentTemplate>
+      </utu:ExtendedSplashScreen>
+
+      <!-- Global Footer -->
+      <Border Grid.Row="2" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="12,8">
+        <Grid>
+          <TextBlock Text="MSAVA" HorizontalAlignment="Left"/>
+          <TextBlock Text="© 2025" HorizontalAlignment="Right"/>
+        </Grid>
+      </Border>
+    </Grid>
   </Border>
 </UserControl>

@@ -1,19 +1,23 @@
 using MSAVA_App.Presentation.FileManagement;
+using MSAVA_App.Services.Authentication;
 
 namespace MSAVA_App.Presentation.Welcome;
 
 public partial record MainModel
 {
     private INavigator _navigator;
+    private readonly AuthenticationService _authService;
 
     public MainModel(
         IStringLocalizer localizer,
         IOptions<AppConfig> appInfo,
         IAuthenticationService authentication,
-        INavigator navigator)
+        INavigator navigator,
+        AuthenticationService authService)
     {
         _navigator = navigator;
         _authentication = authentication;
+        _authService = authService;
         Title = "Main";
         Title += $" - {localizer["ApplicationName"]}";
         Title += $" - {appInfo?.Value?.Environment}";
@@ -23,11 +27,9 @@ public partial record MainModel
 
     public IState<string> Name => State<string>.Value(this, () => string.Empty);
 
-    public async Task GoToSecond()
-    {
-        var name = await Name;
-        await _navigator.NavigateViewModelAsync<SecondModel>(this, data: new Entity(name!));
-    }
+    public string Username => _authService.CurrentSession?.Username ?? string.Empty;
+
+    public string WelcomeText => string.IsNullOrWhiteSpace(Username) ? string.Empty : $"Welcome, {Username.Trim()}.";
 
     public async Task GoToFiles()
     {

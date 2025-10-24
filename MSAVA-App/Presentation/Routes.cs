@@ -39,14 +39,12 @@ internal static class Routes
             new ViewMap(ViewModel: typeof(ShellModel)),
             new ViewMap<LoginPage, LoginModel>(),
             new ViewMap<MainPage, MainModel>(),
-            new DataViewMap<SecondPage, SecondModel, Entity>(),
             new ViewMap<FileManagementPage, FileManagementModel>()
         );
 
         // Register navigation guards/options per route
         NavigationService.RegisterFor<LoginModel>(new NavigationServiceOptions { Public = true });
         NavigationService.RegisterFor<MainModel>(new NavigationServiceOptions { Public = false });
-        NavigationService.RegisterFor<SecondModel>(new NavigationServiceOptions { Public = false });
         NavigationService.RegisterFor<FileManagementModel>(new NavigationServiceOptions { Public = false });
 
         // Build lookup for route construction from registered maps
@@ -55,7 +53,6 @@ internal static class Routes
             [typeof(ShellModel)] = views.FindByViewModel<ShellModel>(),
             [typeof(LoginModel)] = views.FindByViewModel<LoginModel>(),
             [typeof(MainModel)] = views.FindByViewModel<MainModel>(),
-            [typeof(SecondModel)] = views.FindByViewModel<SecondModel>(),
             [typeof(FileManagementModel)] = views.FindByViewModel<FileManagementModel>()
         };
 
@@ -64,7 +61,6 @@ internal static class Routes
         [
             new("Login", typeof(LoginModel)),
             new("Main", typeof(MainModel), IsDefault: true),
-            new("Second", typeof(SecondModel)),
             new("Files", typeof(FileManagementModel))
         ];
 

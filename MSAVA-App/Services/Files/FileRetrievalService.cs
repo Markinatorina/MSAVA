@@ -1,8 +1,9 @@
-    using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MSAVA_App.Services.Api;
 using MSAVA_App.Services.Authentication;
 using MSAVA_Shared.Models;
@@ -12,24 +13,28 @@ namespace MSAVA_App.Services.Files
     public class FileRetrievalService
     {
         private readonly ApiService _api;
-        private readonly AuthenticationService _auth;
+        private readonly ILogger<FileRetrievalService> _logger;
 
-        public FileRetrievalService(ApiService api, AuthenticationService auth)
+        public FileRetrievalService(ApiService api, ILogger<FileRetrievalService> logger)
         {
             _api = api ?? throw new ArgumentNullException(nameof(api));
-            _auth = auth ?? throw new ArgumentNullException(nameof(auth));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IReadOnlyList<SearchFileDataDTO>> GetAllFileMetadataAsync(CancellationToken cancellationToken = default)
         {
             var list = await _api.SendForAsync<List<SearchFileDataDTO>>(
                 HttpMethod.Get,
-                "api/files/retrieve/meta/all",
-                bearerToken: _auth.AccessToken,
-                cancellationToken: cancellationToken
-            );
+                ApiService.Routes.FilesRetrieveMetaAll,
+                cancellationToken: cancellationToken);
 
-            return (IReadOnlyList<SearchFileDataDTO>)(list ?? new List<SearchFileDataDTO>());
+            if (list is null)
+            {
+                _logger.LogWarning("Files metadata request returned no data");
+                return Array.Empty<SearchFileDataDTO>();
+            }
+
+            return list;
         }
     }
 }

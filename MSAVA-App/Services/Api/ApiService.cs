@@ -14,6 +14,9 @@ public class ApiService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ApiService> _logger;
 
+    // Cached access token for automatic auth header injection
+    private string? _accessToken;
+
     public ApiService(IHttpClientFactory httpClientFactory, ILogger<ApiService> logger)
     {
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
@@ -29,7 +32,15 @@ public class ApiService
         public const string AuthRegister = "api/auth/register";
         public const string UsersMe = "api/users/me";
         public const string UsersClaims = "api/users/claims";
+        public const string FilesRetrieveMetaAll = "api/files/retrieve/meta/all";
     }
+
+    public void SetAccessToken(string? token)
+    {
+        _accessToken = string.IsNullOrWhiteSpace(token) ? null : token;
+    }
+
+    public void ClearAccessToken() => _accessToken = null;
 
     public HttpClient CreateClient()
     {
@@ -46,16 +57,17 @@ public class ApiService
         return client;
     }
 
-    public HttpRequestMessage CreateJsonRequest(HttpMethod method, string relativeUrl, object? body = null, string? bearerToken = null)
+    public HttpRequestMessage CreateJsonRequest(HttpMethod method, string relativeUrl, object? body = null, bool anonymous = false)
     {
         var request = new HttpRequestMessage(method, relativeUrl);
         if (body is not null)
         {
             request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
         }
-        if (!string.IsNullOrWhiteSpace(bearerToken))
+        // Automatically attach bearer token if available and not an anonymous call
+        if (!anonymous && !string.IsNullOrWhiteSpace(_accessToken))
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
         }
         return request;
     }
@@ -66,9 +78,9 @@ public class ApiService
         return await client.SendAsync(message, cancellationToken);
     }
 
-    public async Task<T?> SendForAsync<T>(HttpMethod method, string relativeUrl, object? body = null, string? bearerToken = null, CancellationToken cancellationToken = default)
+    public async Task<T?> SendForAsync<T>(HttpMethod method, string relativeUrl, object? body = null, CancellationToken cancellationToken = default, bool anonymous = false)
     {
-        using var msg = CreateJsonRequest(method, relativeUrl, body, bearerToken);
+        using var msg = CreateJsonRequest(method, relativeUrl, body, anonymous);
         using var resp = await SendAsync(msg, cancellationToken);
         if (!resp.IsSuccessStatusCode)
         {

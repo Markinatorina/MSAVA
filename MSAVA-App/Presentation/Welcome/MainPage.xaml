@@ -4,32 +4,22 @@
       xmlns:local="using:MSAVA_App.Presentation"
       xmlns:uen="using:Uno.Extensions.Navigation.UI"
       xmlns:utu="using:Uno.Toolkit.UI"
-      xmlns:um="using:Uno.Material"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
-  <ScrollViewer IsTabStop="True">
-    <Grid utu:SafeArea.Insets="VisibleBounds">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition />
-      </Grid.RowDefinitions>
-      <utu:NavigationBar Content="{Binding Title}" />
-
-      <StackPanel Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="16">
-        <TextBox Text="{Binding Name, Mode=TwoWay}"
-            PlaceholderText="Enter your name:" />
-        <Button Content="Go to Second Page"
-            AutomationProperties.AutomationId="SecondPageButton"
-            Command="{Binding GoToSecond}" />
-        <Button Content="Open File Management"
-            AutomationProperties.AutomationId="FileManagementButton"
-            Command="{Binding GoToFiles}" />
-        <Button Content="Logout"
-            Command="{Binding Logout}" />
-      </StackPanel>
-    </Grid>
-  </ScrollViewer>
+    <ScrollViewer IsTabStop="True">
+        <Grid utu:SafeArea.Insets="VisibleBounds">
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="16">
+                <TextBlock Margin="0,0,0,8" FontSize="16" HorizontalAlignment="Center" 
+                           Text="{Binding WelcomeText}" />
+                <Button Content="Open File Management"
+                AutomationProperties.AutomationId="FileManagementButton"
+                Command="{Binding GoToFiles}" />
+                <Button Content="Logout"
+                Command="{Binding Logout}" />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Page>

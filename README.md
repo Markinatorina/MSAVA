@@ -1,5 +1,5 @@
 # MSAVA
-A .NET web application designed to manage private or public access to static assets such as documents or image files. This software was commissioned by the IvicTech corporation, and is available under the terms of the GNU General Public License v3.0 (GPLv3).
+A .NET web application designed to manage private or public access to static assets such as documents or image files. This software was commissioned by the IvicTech corporation, and is available under the terms of the GNU Affero General Public License v3.0 or later.
 Frontend (Uno Platform) currently a work in progress.
 
 # Key features

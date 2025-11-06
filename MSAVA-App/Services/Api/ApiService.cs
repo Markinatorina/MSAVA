@@ -33,6 +33,9 @@ public class ApiService
         public const string UsersMe = "api/users/me";
         public const string UsersClaims = "api/users/claims";
         public const string FilesRetrieveMetaAll = "api/files/retrieve/meta/all";
+        public const string FilesStoreStream = "api/files/store/stream";
+        public const string FilesStoreUrl = "api/files/store/url";
+        public const string FilesStoreFormFile = "api/files/store/formfile";
     }
 
     public void SetAccessToken(string? token)
@@ -72,6 +75,19 @@ public class ApiService
         return request;
     }
 
+    public HttpRequestMessage CreateMultipartRequest(HttpMethod method, string relativeUrl, MultipartFormDataContent content, bool anonymous = false)
+    {
+        var request = new HttpRequestMessage(method, relativeUrl)
+        {
+            Content = content
+        };
+        if (!anonymous && !string.IsNullOrWhiteSpace(_accessToken))
+        {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+        }
+        return request;
+    }
+
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage message, CancellationToken cancellationToken = default)
     {
         var client = CreateClient();
@@ -94,6 +110,26 @@ public class ApiService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to deserialize API response for {Url}", relativeUrl);
+            return default;
+        }
+    }
+
+    public async Task<T?> SendMultipartForAsync<T>(HttpMethod method, string relativeUrl, MultipartFormDataContent content, CancellationToken cancellationToken = default, bool anonymous = false)
+    {
+        using var msg = CreateMultipartRequest(method, relativeUrl, content, anonymous);
+        using var resp = await SendAsync(msg, cancellationToken);
+        if (!resp.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("API multipart call {Method} {Url} failed with status {Status}", method, relativeUrl, resp.StatusCode);
+            return default;
+        }
+        try
+        {
+            return await resp.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to deserialize multipart API response for {Url}", relativeUrl);
             return default;
         }
     }

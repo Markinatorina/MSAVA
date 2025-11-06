@@ -1,9 +1,10 @@
 namespace MSAVA_App.Presentation.FileManagement;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MSAVA_App.Services.Files;
@@ -18,16 +19,15 @@ public partial record FileManagementModel : INotifyPropertyChanged
     private readonly IDispatcher _dispatcher;
     private readonly FileRetrievalService _filesService;
     private readonly NavigationService _navigation;
+    private readonly FileUploadClientService _uploadService;
 
-    public FileManagementModel(IDispatcher dispatcher, FileRetrievalService filesService, NavigationService navigation)
+    public FileManagementModel(IDispatcher dispatcher, FileRetrievalService filesService, NavigationService navigation, FileUploadClientService uploadService)
     {
         _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         _filesService = filesService ?? throw new ArgumentNullException(nameof(filesService));
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
+        _uploadService = uploadService ?? throw new ArgumentNullException(nameof(uploadService));
         Files = new ObservableCollection<SearchFileDataDTO>();
-
-        // Initial load is triggered by the view (Loaded/DataContextChanged). Avoid double-load from ctor.
-        // _ = SaveAndRefreshAsync();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -48,6 +48,100 @@ public partial record FileManagementModel : INotifyPropertyChanged
     public bool IsLoaded => !IsLoading;
 
     public ObservableCollection<SearchFileDataDTO> Files { get; }
+
+    // UI state: add new file form visibility
+    private bool _isAddMode;
+    public bool IsAddMode
+    {
+        get => _isAddMode;
+        set
+        {
+            if (_isAddMode == value) return;
+            _isAddMode = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAddMode)));
+        }
+    }
+
+    // Result/status dialog state
+    private bool _showUploadResult;
+    public bool ShowUploadResult
+    {
+        get => _showUploadResult;
+        set { if (_showUploadResult == value) return; _showUploadResult = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowUploadResult))); }
+    }
+
+    private string _uploadResultTitle = string.Empty;
+    public string UploadResultTitle
+    {
+        get => _uploadResultTitle; set { if (_uploadResultTitle == value) return; _uploadResultTitle = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UploadResultTitle))); }
+    }
+
+    private string _uploadResultBody = string.Empty;
+    public string UploadResultBody
+    {
+        get => _uploadResultBody; set { if (_uploadResultBody == value) return; _uploadResultBody = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UploadResultBody))); }
+    }
+
+    private string _uploadResultCopyText = string.Empty;
+    public string UploadResultCopyText
+    {
+        get => _uploadResultCopyText; set { if (_uploadResultCopyText == value) return; _uploadResultCopyText = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UploadResultCopyText))); }
+    }
+
+    // Form fields for SaveFileFromFormFileDTO
+    private string _newFileName = string.Empty;
+    public string NewFileName
+    {
+        get => _newFileName; set { if (_newFileName == value) return; _newFileName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewFileName))); }
+    }
+
+    private string _newFileExtension = string.Empty;
+    public string NewFileExtension
+    {
+        get => _newFileExtension; set { if (_newFileExtension == value) return; _newFileExtension = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewFileExtension))); }
+    }
+
+    private string _newDescription = string.Empty;
+    public string NewDescription
+    {
+        get => _newDescription; set { if (_newDescription == value) return; _newDescription = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewDescription))); }
+    }
+
+    private string _newTagsCsv = string.Empty;
+    public string NewTagsCsv
+    {
+        get => _newTagsCsv; set { if (_newTagsCsv == value) return; _newTagsCsv = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewTagsCsv))); }
+    }
+
+    private string _newCategoriesCsv = string.Empty;
+    public string NewCategoriesCsv
+    {
+        get => _newCategoriesCsv; set { if (_newCategoriesCsv == value) return; _newCategoriesCsv = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewCategoriesCsv))); }
+    }
+
+    private Guid _newAccessGroupId = Guid.Empty;
+    public Guid NewAccessGroupId
+    {
+        get => _newAccessGroupId; set { if (_newAccessGroupId == value) return; _newAccessGroupId = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewAccessGroupId))); }
+    }
+
+    private bool _newPublicViewing;
+    public bool NewPublicViewing
+    {
+        get => _newPublicViewing; set { if (_newPublicViewing == value) return; _newPublicViewing = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewPublicViewing))); }
+    }
+
+    private bool _newPublicDownload;
+    public bool NewPublicDownload
+    {
+        get => _newPublicDownload; set { if (_newPublicDownload == value) return; _newPublicDownload = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewPublicDownload))); }
+    }
+
+    private Stream? _newFileStream;
+    public Stream? NewFileStream
+    {
+        get => _newFileStream; set { if (_newFileStream == value) return; _newFileStream = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewFileStream))); }
+    }
 
     public async Task SaveAndRefreshAsync(CancellationToken ct = default)
     {
@@ -75,6 +169,62 @@ public partial record FileManagementModel : INotifyPropertyChanged
     }
 
     public Task Save() => SaveAndRefreshAsync();
+
+    public async Task StartAddAsync()
+    {
+        await _dispatcher.ExecuteAsync(() => IsAddMode = true);
+    }
+
+    private async Task ResetAddFormAsync()
+    {
+        await _dispatcher.ExecuteAsync(() =>
+        {
+            IsAddMode = false;
+            NewFileName = string.Empty;
+            NewFileExtension = string.Empty;
+            NewDescription = string.Empty;
+            NewTagsCsv = string.Empty;
+            NewCategoriesCsv = string.Empty;
+            NewAccessGroupId = Guid.Empty;
+            NewPublicViewing = false;
+            NewPublicDownload = false;
+            NewFileStream = null;
+        });
+    }
+
+    public async Task UploadAsync(CancellationToken ct = default)
+    {
+        if (NewFileStream is null) return;
+        var tags = (NewTagsCsv ?? string.Empty).Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        var categories = (NewCategoriesCsv ?? string.Empty).Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+        var outcome = await _uploadService.CreateFileFromFormFileAsync(
+            fileName: NewFileName,
+            fileExtension: NewFileExtension,
+            fileStream: NewFileStream,
+            accessGroupId: NewAccessGroupId,
+            tags: tags,
+            categories: categories,
+            description: NewDescription,
+            publicViewing: NewPublicViewing,
+            publicDownload: NewPublicDownload,
+            ct: ct);
+
+        // Display result dialog
+        await _dispatcher.ExecuteAsync(() =>
+        {
+            UploadResultTitle = outcome.Success ? "Upload complete" : "Upload failed";
+            UploadResultBody = $"Status: {outcome.StatusCode}\n" + (outcome.Success ? $"Id: {outcome.Id}" : $"Error: {outcome.Error}");
+            UploadResultCopyText = outcome.Success ? outcome.Id ?? string.Empty : outcome.Error ?? string.Empty;
+            ShowUploadResult = true;
+        });
+
+        if (outcome.Success)
+        {
+            await ResetAddFormAsync();
+            await SaveAndRefreshAsync(ct);
+        }
+    }
 
     // Navigate back to main page
     public async Task GoToMainAsync(CancellationToken ct = default)

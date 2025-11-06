@@ -25,6 +25,9 @@ public partial class App : Application
     protected Window? MainWindow { get; private set; }
     protected IHost? Host { get; private set; }
 
+    // Expose services for pages/components that need to resolve singletons
+    public static IServiceProvider? Services => (Current as App)?.Host?.Services;
+
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         var builder = this.CreateBuilder(args)
@@ -118,6 +121,7 @@ public partial class App : Application
                     services.AddSingleton<ApiService>();
                     services.AddSingleton<NavigationService>();
                     services.AddSingleton<FileRetrievalService>();
+                    services.AddSingleton<FileUploadClientService>();
                 })
                 .UseNavigation(ReactiveViewModelMappings.ViewModelMappings, RegisterRoutes)
             );

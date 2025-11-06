@@ -12,6 +12,8 @@
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"
                                                  xmlns:converters="using:MSAVA_App.Presentation.Converters" />
+        <converters:BooleanToVisibilityInverseConverter x:Key="BooleanToVisibilityInverseConverter"
+                                                        xmlns:converters="using:MSAVA_App.Presentation.Converters" />
     </Page.Resources>
 
     <Grid Padding="16" RowDefinitions="Auto,*">
@@ -36,21 +38,25 @@
                     ToolTipService.ToolTip="Save">
                 <SymbolIcon Symbol="Sync" />
             </Button>
+
         </StackPanel>
+        <!-- NavigationView -->
+        <NavigationView Grid.Row="1" IsBackButtonVisible="Collapsed" x:Name="FilesNav"
+                        DataContext="{Binding}"
+                        PaneDisplayMode="LeftCompact"
+                        IsSettingsVisible="False"
+                        ItemInvoked="FilesNav_ItemInvoked">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Icon="View" Content="Your Files" Tag="YourFiles" SelectsOnInvoked="False" />
+                <NavigationViewItem Icon="Add" Content="Add new files" Tag="AddFiles" SelectsOnInvoked="False" />
+            </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Icon="Cancel" Content="Exit" Tag="Exit" SelectsOnInvoked="False" />
+            </NavigationView.FooterMenuItems>
 
-        <Grid Grid.Row="1" Visibility="{Binding IsLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <NavigationView IsBackButtonVisible="Collapsed" x:Name="FilesNav"
-                            DataContext="{Binding}"
-                            PaneDisplayMode="LeftCompact"
-                            IsSettingsVisible="False"
-                            ItemInvoked="FilesNav_ItemInvoked">
-                <NavigationView.MenuItems>
-                    <NavigationViewItem Icon="View" Content="Your Files" Tag="YourFiles" SelectsOnInvoked="False" />
-                </NavigationView.MenuItems>
-                <NavigationView.FooterMenuItems>
-                    <NavigationViewItem Icon="Cancel" Content="Exit" Tag="Exit" SelectsOnInvoked="False" />
-                </NavigationView.FooterMenuItems>
-
+            <!-- Content area changes depending on selected value -->
+            <Grid>
+                <!-- Table/List -->
                 <tv:TableView MaxColumnWidth="300" MinColumnWidth="150" RowMinHeight="50"
                               ShowExportOptions="True"
                               HeaderGridLinesVisibility="All"
@@ -61,8 +67,61 @@
                               VerticalGridLinesStroke="#12FFFFFF"
                               AlternateRowBackground="#50515C6B"
                               AllowDrop="True" CanDragItems="True" CanReorderItems="True"
-                              ItemsSource="{Binding Files}" />
-            </NavigationView>
-        </Grid>
+                              ItemsSource="{Binding Files}"
+                              Visibility="{Binding IsAddMode, Converter={StaticResource BooleanToVisibilityInverseConverter}}" />
+
+                <!-- Add form -->
+                <ScrollViewer Visibility="{Binding IsAddMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Add a new file" FontSize="20" FontWeight="SemiBold" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Click="PickFile_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <SymbolIcon Symbol="Upload" />
+                                    <TextBlock Text="Choose file" />
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Text="File selected" Visibility="{Binding NewFileStream, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </StackPanel>
+
+                        <TextBox Header="File name" Text="{Binding NewFileName, Mode=TwoWay}" PlaceholderText="e.g. report-2025" />
+                        <TextBox Header="File extension" Text="{Binding NewFileExtension, Mode=TwoWay}" PlaceholderText="e.g. pdf, png, txt" />
+                        <TextBox Header="Description" Text="{Binding NewDescription, Mode=TwoWay}" />
+                        <TextBox Header="Tags (comma-separated)" Text="{Binding NewTagsCsv, Mode=TwoWay}" />
+                        <TextBox Header="Categories (comma-separated)" Text="{Binding NewCategoriesCsv, Mode=TwoWay}" />
+                        <TextBox Header="Access Group Id (GUID)" Text="{Binding NewAccessGroupId, Mode=TwoWay}" />
+
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <CheckBox Content="Public viewing" IsChecked="{Binding NewPublicViewing, Mode=TwoWay}" />
+                            <CheckBox Content="Public download" IsChecked="{Binding NewPublicDownload, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Click="Upload_Click" IsEnabled="{Binding IsLoaded}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <SymbolIcon Symbol="Save" />
+                                    <TextBlock Text="Upload" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </NavigationView>
+
+        <!-- Upload result dialog -->
+        <ContentDialog x:Name="UploadResultDialog"
+                       Title="{Binding UploadResultTitle}"
+                       PrimaryButtonText="Copy"
+                       CloseButtonText="Close"
+                       DefaultButton="Close"
+                       IsPrimaryButtonEnabled="True"
+                       IsSecondaryButtonEnabled="False"
+                       Visibility="{Binding ShowUploadResult, Converter={StaticResource BooleanToVisibilityConverter}}"
+                       PrimaryButtonClick="UploadResultDialog_PrimaryButtonClick"
+                       Closing="UploadResultDialog_Closing">
+            <TextBlock Text="{Binding UploadResultBody}" TextWrapping="Wrap" />
+        </ContentDialog>
     </Grid>
 </Page>

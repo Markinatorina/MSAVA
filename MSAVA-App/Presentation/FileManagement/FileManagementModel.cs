@@ -42,10 +42,13 @@ public partial record FileManagementModel : INotifyPropertyChanged
             _isLoading = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsLoading)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsLoaded)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanUpload)));
         }
     }
 
     public bool IsLoaded => !IsLoading;
+
+    public bool CanUpload => IsLoaded && !IsUploading;
 
     public ObservableCollection<SearchFileDataDTO> Files { get; }
 
@@ -62,7 +65,21 @@ public partial record FileManagementModel : INotifyPropertyChanged
         }
     }
 
-    // Result/status dialog/infobar state
+    // Upload in-progress state
+    private bool _isUploading;
+    public bool IsUploading
+    {
+        get => _isUploading;
+        private set
+        {
+            if (_isUploading == value) return;
+            _isUploading = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUploading)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CanUpload)));
+        }
+    }
+
+    // Result/status info bar state
     private bool _showUploadResult;
     public bool ShowUploadResult
     {
@@ -205,52 +222,69 @@ public partial record FileManagementModel : INotifyPropertyChanged
         var tags = (NewTagsCsv ?? string.Empty).Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         var categories = (NewCategoriesCsv ?? string.Empty).Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
-        var outcome = await _uploadService.CreateFileFromFormFileAsync(
-            fileName: NewFileName,
-            fileExtension: NewFileExtension,
-            fileStream: NewFileStream,
-            accessGroupId: NewAccessGroupId,
-            tags: tags,
-            categories: categories,
-            description: NewDescription,
-            publicViewing: NewPublicViewing,
-            publicDownload: NewPublicDownload,
-            ct: ct);
-
-        // Display result info bar
         await _dispatcher.ExecuteAsync(() =>
         {
-            UploadResultIsSuccess = outcome.Success;
-            UploadResultTitle = outcome.Success ? "Upload complete" : "Upload failed";
-            UploadResultBody = $"Status: {outcome.StatusCode}\n" + (outcome.Success ? $"Id: {outcome.Id}" : $"Error: {outcome.Error}");
-            UploadResultCopyText = outcome.Success ? outcome.Id ?? string.Empty : outcome.Error ?? string.Empty;
-            ShowUploadResult = true;
+            // Hide any previous result and show uploading indicator
+            ShowUploadResult = false;
+            IsUploading = true;
         });
 
-        // Auto-dismiss after 10 seconds
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10), ct);
-            }
-            catch
-            {
-                // ignore cancellation
-            }
-            finally
-            {
-                await _dispatcher.ExecuteAsync(() => ShowUploadResult = false);
-            }
-        });
+        // DEBUG: Give time to see the in-progress InfoBar
+        await Task.Delay(TimeSpan.FromSeconds(2), ct);
 
-        if (outcome.Success)
+        try
         {
-            await ResetAddFormAsync();
-            await SaveAndRefreshAsync(ct);
+            var outcome = await _uploadService.CreateFileFromFormFileAsync(
+                fileName: NewFileName,
+                fileExtension: NewFileExtension,
+                fileStream: NewFileStream,
+                accessGroupId: NewAccessGroupId,
+                tags: tags,
+                categories: categories,
+                description: NewDescription,
+                publicViewing: NewPublicViewing,
+                publicDownload: NewPublicDownload,
+                ct: ct);
+
+            // Display result info bar
+            await _dispatcher.ExecuteAsync(() =>
+            {
+                UploadResultIsSuccess = outcome.Success;
+                UploadResultTitle = outcome.Success ? "Upload complete" : "Upload failed";
+                UploadResultBody = $"Status: {outcome.StatusCode}\n" + (outcome.Success ? $"Id: {outcome.Id}" : $"Error: {outcome.Error}");
+                UploadResultCopyText = outcome.Success ? outcome.Id ?? string.Empty : outcome.Error ?? string.Empty;
+                ShowUploadResult = true;
+            });
+
+            if (outcome.Success)
+            {
+                await ResetAddFormAsync();
+                await SaveAndRefreshAsync(ct);
+            }
+        }
+        finally
+        {
+            await _dispatcher.ExecuteAsync(() => IsUploading = false);
+
+            // Auto-dismiss after 10 seconds
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10), ct);
+                }
+                catch
+                {
+                    // ignore cancellation
+                }
+                finally
+                {
+                    await _dispatcher.ExecuteAsync(() => ShowUploadResult = false);
+                }
+            });
         }
     }
-
+    
     // Navigate back to main page
     public async Task GoToMainAsync(CancellationToken ct = default)
     {

@@ -14,13 +14,31 @@
                                                  xmlns:converters="using:MSAVA_App.Presentation.Converters" />
         <converters:BooleanToVisibilityInverseConverter x:Key="BooleanToVisibilityInverseConverter"
                                                         xmlns:converters="using:MSAVA_App.Presentation.Converters" />
+        <converters:BooleanNegationConverter x:Key="BooleanNegationConverter"
+                                             xmlns:converters="using:MSAVA_App.Presentation.Converters" />
     </Page.Resources>
 
     <Grid Padding="16" RowDefinitions="Auto,*">
         <TextBlock Text="Loading, please wait..."
                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-        <!-- Upload result infobars at bottom -->
+        <!-- Upload in-progress infobar -->
+        <InfoBar x:Name="UploadingInfoBar"
+                 Grid.RowSpan="2"
+                 VerticalAlignment="Bottom"
+                 Canvas.ZIndex="1000"
+                 Severity="Warning"
+                 IsIconVisible="True"
+                 IsClosable="False"
+                 IsOpen="{Binding IsUploading, Mode=TwoWay}"
+                 Title="Uploading file..."
+                 Message="Please wait while your file is being uploaded.">
+            <InfoBar.Content>
+                <ProgressBar IsIndeterminate="True" ShowPaused="False" ShowError="False" Height="4" HorizontalAlignment="Stretch" />
+            </InfoBar.Content>
+        </InfoBar>
+
+        <!-- Upload result infobars -->
         <StackPanel Spacing="8"
                     Grid.RowSpan="2"
                     VerticalAlignment="Bottom"
@@ -69,26 +87,6 @@
             </InfoBar>
         </StackPanel>
 
-        <StackPanel Grid.RowSpan="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Margin="16"
-                    Spacing="12"
-                    Canvas.ZIndex="1000">
-
-            <!-- Floating save & refresh button -->
-            <Button Width="48"
-                    Height="48"
-                    Padding="0"
-                    CornerRadius="14"
-                    IsEnabled="{Binding IsLoaded}"
-                    Command="{Binding Save}"
-                    ToolTipService.ToolTip="Save">
-                <SymbolIcon Symbol="Sync" />
-            </Button>
-
-        </StackPanel>
         <!-- NavigationView -->
         <NavigationView Grid.Row="1" IsBackButtonVisible="Collapsed" x:Name="FilesNav"
                         DataContext="{Binding}"
@@ -120,7 +118,8 @@
                               Visibility="{Binding IsAddMode, Converter={StaticResource BooleanToVisibilityInverseConverter}}" />
 
                 <!-- Add form -->
-                <ScrollViewer Visibility="{Binding IsAddMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ScrollViewer Visibility="{Binding IsAddMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                              IsEnabled="{Binding IsUploading, Converter={StaticResource BooleanNegationConverter}}">
                     <StackPanel Spacing="12">
                         <TextBlock Text="Add a new file" FontSize="20" FontWeight="SemiBold" />
 
@@ -147,7 +146,7 @@
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button Click="Upload_Click" IsEnabled="{Binding IsLoaded}">
+                            <Button Click="Upload_Click" IsEnabled="{Binding CanUpload}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <SymbolIcon Symbol="Save" />
                                     <TextBlock Text="Upload" />

@@ -62,12 +62,19 @@ public partial record FileManagementModel : INotifyPropertyChanged
         }
     }
 
-    // Result/status dialog state
+    // Result/status dialog/infobar state
     private bool _showUploadResult;
     public bool ShowUploadResult
     {
         get => _showUploadResult;
         set { if (_showUploadResult == value) return; _showUploadResult = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ShowUploadResult))); }
+    }
+
+    private bool _uploadResultIsSuccess;
+    public bool UploadResultIsSuccess
+    {
+        get => _uploadResultIsSuccess;
+        set { if (_uploadResultIsSuccess == value) return; _uploadResultIsSuccess = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UploadResultIsSuccess))); }
     }
 
     private string _uploadResultTitle = string.Empty;
@@ -179,7 +186,7 @@ public partial record FileManagementModel : INotifyPropertyChanged
     {
         await _dispatcher.ExecuteAsync(() =>
         {
-            IsAddMode = false;
+            // Keep user on the add form; just clear fields
             NewFileName = string.Empty;
             NewFileExtension = string.Empty;
             NewDescription = string.Empty;
@@ -210,13 +217,31 @@ public partial record FileManagementModel : INotifyPropertyChanged
             publicDownload: NewPublicDownload,
             ct: ct);
 
-        // Display result dialog
+        // Display result info bar
         await _dispatcher.ExecuteAsync(() =>
         {
+            UploadResultIsSuccess = outcome.Success;
             UploadResultTitle = outcome.Success ? "Upload complete" : "Upload failed";
             UploadResultBody = $"Status: {outcome.StatusCode}\n" + (outcome.Success ? $"Id: {outcome.Id}" : $"Error: {outcome.Error}");
             UploadResultCopyText = outcome.Success ? outcome.Id ?? string.Empty : outcome.Error ?? string.Empty;
             ShowUploadResult = true;
+        });
+
+        // Auto-dismiss after 10 seconds
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10), ct);
+            }
+            catch
+            {
+                // ignore cancellation
+            }
+            finally
+            {
+                await _dispatcher.ExecuteAsync(() => ShowUploadResult = false);
+            }
         });
 
         if (outcome.Success)

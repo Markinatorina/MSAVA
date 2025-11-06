@@ -20,6 +20,55 @@
         <TextBlock Text="Loading, please wait..."
                    Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
+        <!-- Upload result infobars at bottom -->
+        <StackPanel Spacing="8"
+                    Grid.RowSpan="2"
+                    VerticalAlignment="Bottom"
+                    Canvas.ZIndex="1000">
+            <InfoBar x:Name="SuccessInfoBar"
+                     IsOpen="{Binding ShowUploadResult, Mode=TwoWay}"
+                     IsIconVisible="True"
+                     IsClosable="True"
+                     Severity="Success"
+                     Title="{Binding UploadResultTitle}"
+                     Message="{Binding UploadResultBody}"
+                     Visibility="{Binding UploadResultIsSuccess, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <InfoBar.Content>
+                    <ProgressBar x:Name="SuccessProgressBar"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 Height="4"
+                                 HorizontalAlignment="Stretch"
+                                 Margin="0,0,0,8" />
+                </InfoBar.Content>
+                <InfoBar.ActionButton>
+                    <Button Click="CopyResult_Click">Copy</Button>
+                </InfoBar.ActionButton>
+            </InfoBar>
+            <InfoBar x:Name="ErrorInfoBar"
+                     IsOpen="{Binding ShowUploadResult, Mode=TwoWay}"
+                     IsIconVisible="True"
+                     IsClosable="True"
+                     Severity="Error"
+                     Title="{Binding UploadResultTitle}"
+                     Message="{Binding UploadResultBody}"
+                     Visibility="{Binding UploadResultIsSuccess, Converter={StaticResource BooleanToVisibilityInverseConverter}}">
+                <InfoBar.Content>
+                    <ProgressBar x:Name="ErrorProgressBar"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 Height="4"
+                                 HorizontalAlignment="Stretch"
+                                 Margin="0,0,0,8" />
+                </InfoBar.Content>
+                <InfoBar.ActionButton>
+                    <Button Click="CopyResult_Click">Copy</Button>
+                </InfoBar.ActionButton>
+            </InfoBar>
+        </StackPanel>
+
         <StackPanel Grid.RowSpan="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
@@ -110,18 +159,5 @@
             </Grid>
         </NavigationView>
 
-        <!-- Upload result dialog -->
-        <ContentDialog x:Name="UploadResultDialog"
-                       Title="{Binding UploadResultTitle}"
-                       PrimaryButtonText="Copy"
-                       CloseButtonText="Close"
-                       DefaultButton="Close"
-                       IsPrimaryButtonEnabled="True"
-                       IsSecondaryButtonEnabled="False"
-                       Visibility="{Binding ShowUploadResult, Converter={StaticResource BooleanToVisibilityConverter}}"
-                       PrimaryButtonClick="UploadResultDialog_PrimaryButtonClick"
-                       Closing="UploadResultDialog_Closing">
-            <TextBlock Text="{Binding UploadResultBody}" TextWrapping="Wrap" />
-        </ContentDialog>
     </Grid>
 </Page>

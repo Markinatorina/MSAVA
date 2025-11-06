@@ -5,6 +5,8 @@ using Microsoft.UI.Xaml.Data;
 using System.Threading.Tasks;
 using System.IO;
 using MSAVA_App.Services.Pickers;
+using System.ComponentModel;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace MSAVA_App.Presentation.FileManagement;
 
@@ -13,10 +15,14 @@ public sealed partial class FileManagementPage : Page
     private bool _loadedOnce;
     private FileManagementModel? _vm;
 
+    private Storyboard? _progressStoryboard;
+    private const int InfoBarDurationMs = 10_000;
+
     public FileManagementPage()
     {
         this.InitializeComponent();
         this.Loaded += FileManagementPage_Loaded;
+        this.Unloaded += FileManagementPage_Unloaded;
         this.DataContextChanged += FileManagementPage_DataContextChanged;
     }
 
@@ -32,10 +38,19 @@ public sealed partial class FileManagementPage : Page
         var vm = ResolveVm(DataContext);
         if (vm is not null)
         {
-            _vm = vm;
+            AttachVm(vm);
             _loadedOnce = true;
             await vm.SaveAndRefreshAsync();
         }
+    }
+
+    private void FileManagementPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (_vm is not null)
+        {
+            _vm.PropertyChanged -= VmOnPropertyChanged;
+        }
+        StopInfoBarProgress();
     }
 
     private async void FileManagementPage_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
@@ -45,9 +60,89 @@ public sealed partial class FileManagementPage : Page
         var vm = ResolveVm(args.NewValue);
         if (vm is not null)
         {
-            _vm = vm;
+            AttachVm(vm);
             _loadedOnce = true;
             await vm.SaveAndRefreshAsync();
+        }
+    }
+
+    private void AttachVm(FileManagementModel vm)
+    {
+        if (_vm == vm) return;
+        if (_vm is not null)
+        {
+            _vm.PropertyChanged -= VmOnPropertyChanged;
+        }
+        _vm = vm;
+        _vm.PropertyChanged += VmOnPropertyChanged;
+    }
+
+    private void VmOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(FileManagementModel.ShowUploadResult))
+        {
+            var vm = _vm;
+            if (vm is null) return;
+            if (vm.ShowUploadResult)
+            {
+                StartInfoBarProgress();
+            }
+            else
+            {
+                StopInfoBarProgress();
+            }
+        }
+    }
+
+    private void StartInfoBarProgress()
+    {
+        StopInfoBarProgress();
+
+        // Reset bars to 0
+        if (SuccessProgressBar is not null) SuccessProgressBar.Value = 0;
+        if (ErrorProgressBar is not null) ErrorProgressBar.Value = 0;
+
+        // Choose the visible bar
+        var useSuccess = _vm?.UploadResultIsSuccess == true;
+        var targetBar = useSuccess ? SuccessProgressBar : ErrorProgressBar;
+        if (targetBar is null)
+            return;
+
+        var anim = new DoubleAnimation
+        {
+            From = 0,
+            To = 100,
+            Duration = new Duration(TimeSpan.FromMilliseconds(InfoBarDurationMs)),
+            EnableDependentAnimation = true // ensure runs on all platforms
+        };
+
+        _progressStoryboard = new Storyboard();
+        _progressStoryboard.Children.Add(anim);
+        Storyboard.SetTarget(anim, targetBar);
+        Storyboard.SetTargetProperty(anim, "Value");
+        _progressStoryboard.Begin();
+    }
+
+    private void StopInfoBarProgress()
+    {
+        if (_progressStoryboard is not null)
+        {
+            try
+            {
+                _progressStoryboard.Stop();
+            }
+            catch { }
+            _progressStoryboard = null;
+        }
+
+        // Snap to full on stop if still open
+        if (SuccessInfoBar?.IsOpen == true)
+        {
+            SuccessProgressBar.Value = 100;
+        }
+        if (ErrorInfoBar?.IsOpen == true)
+        {
+            ErrorProgressBar.Value = 100;
         }
     }
 
@@ -77,17 +172,9 @@ public sealed partial class FileManagementPage : Page
         var vm = _vm ?? ResolveVm(DataContext);
         if (vm is null) return;
         await vm.UploadAsync();
-
-        // Show dialog when VM indicates a result is available
-        if (vm.ShowUploadResult)
-        {
-            UploadResultDialog.DataContext = vm; // ensure bindings resolve
-            UploadResultDialog.XamlRoot = this.XamlRoot; // ensure dialog attaches to this visual tree
-            await UploadResultDialog.ShowAsync();
-        }
     }
 
-    private void UploadResultDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private void CopyResult_Click(object sender, RoutedEventArgs e)
     {
         var vm = _vm ?? ResolveVm(DataContext);
         if (vm is null) return;
@@ -102,13 +189,6 @@ public sealed partial class FileManagementPage : Page
         {
             // ignore clipboard failures on some platforms
         }
-    }
-
-    private void UploadResultDialog_Closing(ContentDialog sender, ContentDialogClosingEventArgs args)
-    {
-        var vm = _vm ?? ResolveVm(DataContext);
-        if (vm is null) return;
-        vm.ShowUploadResult = false;
     }
 
     private async void PickFile_Click(object sender, RoutedEventArgs e)
